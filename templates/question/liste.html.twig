@@ -1,0 +1,457 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Questions du quiz {{ quiz.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1000px;
+        }
+        
+        .page-header {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-header h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .page-header:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        .admin-link {
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .admin-link:hover {
+            transform: translateX(-3px);
+        }
+        
+        .admin-link i {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-add {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 50px;
+            padding: 0.6rem 1.25rem;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.15);
+            transition: all 0.3s;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(13, 110, 253, 0.2);
+            color: white;
+        }
+        
+        .btn-add i {
+            margin-right: 0.5rem;
+        }
+        
+        .questions-list {
+            margin-top: 2rem;
+        }
+        
+        .question-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f3f5;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-header {
+            background-color: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .question-number {
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .question-number i {
+            margin-right: 0.5rem;
+        }
+        
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .question-body {
+            padding: 1.5rem;
+        }
+        
+        .question-content {
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-top: 1rem;
+        }
+        
+        .question-type {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .question-type i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .question-points {
+            font-weight: 600;
+            color: var(--dark);
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .question-points i {
+            color: #ffc107;
+            margin-right: 0.5rem;
+        }
+        
+        .reponses-list {
+            margin-top: 1.5rem;
+            border-top: 1px solid #f1f3f5;
+            padding-top: 1rem;
+        }
+        
+        .reponse-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 2.5rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            font-size: 0.95rem;
+        }
+        
+        .reponse-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .reponse-item:before {
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+        }
+        
+        .reponse-correct {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .reponse-correct:before {
+            content: '\f00c';
+            color: #28a745;
+        }
+        
+        .reponse-incorrect:before {
+            content: '\f111';
+            color: var(--secondary);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .btn-reorder {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+        
+        .btn-reorder:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        .btn-view:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .btn-edit:hover {
+            background-color: #ffc107;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container admin-container">
+    <a href="{{ path('quiz_admin_editer', {id: quiz.id}) }}" class="admin-link">
+        <i class="fas fa-arrow-left"></i> Retour au quiz
+    </a>
+    
+    <div class="page-header">
+        <h1>Questions du quiz</h1>
+        <a href="{{ path('question_ajouter', {id: quiz.id}) }}" class="btn-add">
+            <i class="fas fa-plus-circle"></i> Ajouter une question
+        </a>
+    </div>
+    
+    <div class="quiz-info">
+        <h2>{{ quiz.titre }}</h2>
+        <p class="text-muted">Formation: {{ formation.titre }}</p>
+    </div>
+    
+    {% if questions|length > 0 %}
+        <div class="questions-list">
+            {% for question in questions %}
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-number">
+                            <i class="fas fa-question-circle"></i> Question {{ loop.index }}
+                        </div>
+                        
+                        <div class="question-actions">
+                            {% if loop.index > 1 %}
+                                <button class="btn-reorder" data-action="up" data-question-id="{{ question.id }}" title="Monter">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                            {% endif %}
+                            
+                            {% if not loop.last %}
+                                <button class="btn-reorder" data-action="down" data-question-id="{{ question.id }}" title="Descendre">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                            {% endif %}
+                            
+                            <a href="{{ path('question_editer', {id: question.id}) }}" class="btn-action btn-edit" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            
+                            {% if question.type != 'texte' %}
+                                <a href="{{ path('reponse_liste', {id: question.id}) }}" class="btn-action btn-view" title="Gérer les réponses">
+                                    <i class="fas fa-list-ul"></i>
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{{ path('question_supprimer', {id: question.id}) }}" class="btn-action btn-delete" title="Supprimer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="question-body">
+                        <div class="question-content">
+                            {{ question.enonce|nl2br }}
+                        </div>
+                        
+                        {% if question.type == 'texte' %}
+                            <div class="reponse-item reponse-correct">
+                                {{ question.reponseTexte }}
+                            </div>
+                        {% elseif question.reponses|length > 0 %}
+                            <div class="reponses-list">
+                                {% for reponse in question.reponses %}
+                                    <div class="reponse-item {{ reponse.correct ? 'reponse-correct' : 'reponse-incorrect' }}">
+                                        {{ reponse.texte }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="question-meta">
+                            <div class="question-type">
+                                <i class="fas fa-tag"></i>
+                                {% if question.type == 'choix_unique' %}
+                                    Choix unique
+                                {% elseif question.type == 'choix_multiple' %}
+                                    Choix multiple
+                                {% elseif question.type == 'vrai_faux' %}
+                                    Vrai ou faux
+                                {% elseif question.type == 'texte' %}
+                                    Réponse textuelle
+                                {% endif %}
+                            </div>
+                            
+                            <div class="question-points">
+                                <i class="fas fa-star"></i> {{ question.points }} point{% if question.points > 1 %}s{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h3>Aucune question</h3>
+            <p>Ce quiz ne contient pas encore de questions. Ajoutez des questions pour que les apprenants puissent commencer à passer le quiz.</p>
+            <a href="{{ path('question_ajouter', {id: quiz.id}) }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Ajouter une question
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de la réorganisation des questions
+    const reorderButtons = document.querySelectorAll('.btn-reorder');
+    
+    reorderButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const questionId = this.getAttribute('data-question-id');
+            const direction = this.getAttribute('data-action');
+            
+            // Envoi d'une requête AJAX pour réordonner les questions
+            fetch('{{ path("question_reordonner", {id: "QUESTION_ID"}) }}'.replace('QUESTION_ID', questionId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    direction: direction
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Rechargement de la page pour afficher le nouvel ordre
+                    window.location.reload();
+                } else {
+                    console.error('Erreur lors de la réorganisation:', data.message);
+                    alert('Erreur lors de la réorganisation: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la réorganisation.');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,454 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultats du Quiz {{ quiz.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1100px;
+        }
+        
+        .page-header {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .page-header h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        .admin-link {
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .admin-link:hover {
+            transform: translateX(-3px);
+        }
+        
+        .admin-link i {
+            margin-right: 0.5rem;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f3f5;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card-header {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-card-header i {
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .stat-card-trend {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-card-trend.positive {
+            color: #28a745;
+        }
+        
+        .stat-card-trend.negative {
+            color: #dc3545;
+        }
+        
+        .stat-card-trend i {
+            margin-right: 0.25rem;
+        }
+        
+        .results-table {
+            width: 100%;
+            margin-top: 2rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .results-table td {
+            padding: 1rem;
+            border-top: 1px solid #f1f3f5;
+            vertical-align: middle;
+        }
+        
+        .results-table tbody tr {
+            background-color: white;
+            transition: all 0.2s;
+        }
+        
+        .results-table tbody tr:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-name img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            object-fit: cover;
+        }
+        
+        .score-indicator {
+            display: inline-block;
+            width: 100%;
+            max-width: 150px;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .score-indicator-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 5px;
+        }
+        
+        .score-success {
+            background-color: #28a745;
+        }
+        
+        .score-failure {
+            background-color: #dc3545;
+        }
+        
+        .score-value {
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .date-cell {
+            white-space: nowrap;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .time-cell {
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .badge-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        
+        .btn-action i {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-outline-primary {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .section-header {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1.5rem;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .section-header:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container admin-container">
+    <a href="{{ path('quiz_admin_liste') }}" class="admin-link">
+        <i class="fas fa-arrow-left"></i> Retour à la liste des quiz
+    </a>
+    
+    <div class="page-header">
+        <h1>Résultats du quiz</h1>
+        <p class="text-muted">{{ quiz.titre }}</p>
+    </div>
+    
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <i class="fas fa-users"></i> Nombre de tentatives
+            </div>
+            <div class="stat-card-value">{{ tentatives|length }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <i class="fas fa-trophy"></i> Taux de réussite
+            </div>
+            <div class="stat-card-value">
+                {% set successCount = 0 %}
+                {% for tentative in tentatives %}
+                    {% if tentative.reussi %}
+                        {% set successCount = successCount + 1 %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if tentatives|length > 0 %}
+                    {{ ((successCount / tentatives|length) * 100)|round }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <i class="fas fa-chart-line"></i> Score moyen
+            </div>
+            <div class="stat-card-value">
+                {% set totalScore = 0 %}
+                {% for tentative in tentatives %}
+                    {% set totalScore = totalScore + tentative.score %}
+                {% endfor %}
+                
+                {% if tentatives|length > 0 %}
+                    {{ (totalScore / tentatives|length)|round }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <i class="fas fa-clock"></i> Temps moyen
+            </div>
+            <div class="stat-card-value">
+                {% set totalTime = 0 %}
+                {% for tentative in tentatives %}
+                    {% set totalTime = totalTime + tentative.getTempsPasseEnMinutes() %}
+                {% endfor %}
+                
+                {% if tentatives|length > 0 %}
+                    {{ (totalTime / tentatives|length)|round }} min
+                {% else %}
+                    0 min
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <h2 class="section-header">Détail des tentatives</h2>
+    
+    {% if tentatives|length > 0 %}
+        <div class="table-responsive">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Temps</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tentative in tentatives %}
+                        <tr>
+                            <td>
+                                <div class="user-name">
+                                    {% if tentative.utilisateur.photo %}
+                                        <img src="{{ asset('uploads/photos/' ~ tentative.utilisateur.photo) }}" alt="{{ tentative.utilisateur.prenom }}">
+                                    {% else %}
+                                        <span class="avatar-placeholder">{{ tentative.utilisateur.prenom|first }}{{ tentative.utilisateur.nom|first }}</span>
+                                    {% endif %}
+                                    {{ tentative.utilisateur.prenom }} {{ tentative.utilisateur.nom }}
+                                </div>
+                            </td>
+                            <td class="date-cell">
+                                {{ tentative.dateDebut|date('d/m/Y') }}<br>
+                                <small>{{ tentative.dateDebut|date('H:i') }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="score-indicator">
+                                        <div class="score-indicator-bar {{ tentative.reussi ? 'score-success' : 'score-failure' }}" style="width: {{ tentative.score }}%;"></div>
+                                    </div>
+                                    <span class="score-value">{{ tentative.score }}%</span>
+                                </div>
+                            </td>
+                            <td class="time-cell">
+                                {{ tentative.getTempsPasseEnMinutes() }} min
+                            </td>
+                            <td>
+                                <span class="status-badge {{ tentative.reussi ? 'badge-success' : 'badge-danger' }}">
+                                    {{ tentative.reussi ? 'Réussi' : 'Échoué' }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ path('quiz_resultats', {id: quiz.id, tentative: tentative.id}) }}" class="btn btn-outline-primary btn-action btn-sm">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>Aucune tentative</h3>
+            <p>Ce quiz n'a pas encore été effectué par les apprenants. Les résultats apparaîtront ici dès que des tentatives seront faites.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

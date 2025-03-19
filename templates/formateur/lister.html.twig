@@ -1,0 +1,555 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Formateurs | ABCCI{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .formateurs-container {
+            padding: 2rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin: 2rem auto; /* Centrage horizontal avec auto */
+            max-width: 1200px; /* Largeur maximale pour grands écrans */
+        }
+        
+        .page-header {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center; /* Centrage du texte */
+        }
+        
+        .page-header h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .page-header:after {
+            content: '';
+            position: absolute;
+            left: 50%; /* Centrage de la ligne décorative */
+            transform: translateX(-50%); /* Centrage précis */
+            bottom: -1px;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        .add-btn {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 50px;
+            padding: 0.7rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.15);
+            transition: all 0.3s;
+            margin: 0 auto; /* Centrage horizontal dans son conteneur */
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(13, 110, 253, 0.2);
+        }
+        
+        .add-btn i {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .formateurs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            justify-content: center; /* Centrage des cartes */
+        }
+        
+        .formateur-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            max-width: 400px; /* Largeur maximale pour les cartes */
+            margin: 0 auto; /* Centrage horizontal */
+        }
+        
+        .formateur-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formateur-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #f8f9fa;
+            justify-content: center; /* Centrage des éléments */
+        }
+        
+        .formateur-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1rem;
+            position: relative;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formateur-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .formateur-info {
+            flex: 1;
+        }
+        
+        .formateur-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            color: var(--dark);
+        }
+        
+        .formateur-email {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .formateur-phone {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .formateur-phone i {
+            color: var(--primary);
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .formateur-body {
+            padding: 1.5rem;
+            text-align: center; /* Centrage du contenu */
+        }
+        
+        .formateur-bio {
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .formateur-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center; /* Centrage des boutons */
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        .btn-view:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .btn-edit:hover {
+            background-color: #ffc107;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        /* Style alternatif pour la vue tableau */
+        .formateurs-table {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin: 0 auto; /* Centrage horizontal */
+        }
+        
+        .formateurs-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            padding: 1rem;
+            border: none;
+            text-align: center; /* Centrage du texte */
+        }
+        
+        .formateurs-table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #f1f3f5;
+            text-align: center; /* Centrage du texte */
+        }
+        
+        .formateurs-table tbody tr {
+            transition: all 0.2s;
+            background-color: white;
+        }
+        
+        .formateurs-table tbody tr:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background-color: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 50px;
+            width: fit-content;
+            margin-left: auto; /* Centrage horizontal */
+            margin-right: auto;
+        }
+        
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: all 0.2s;
+        }
+        
+        .view-btn.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .view-btn i {
+            margin-right: 5px;
+        }
+        
+        .badge-specialty {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-container {
+            margin-bottom: 1.5rem;
+            position: relative;
+            max-width: 500px; /* Largeur maximale */
+            margin-left: auto; /* Centrage horizontal */
+            margin-right: auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid #e9ecef;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            outline: none;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+        
+        /* Centrage pour le message d'alerte */
+        .alert {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 992px) {
+            .formateurs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: center; /* Centrage sur mobile */
+                gap: 1rem;
+            }
+            
+            .formateurs-table th:nth-child(5),
+            .formateurs-table td:nth-child(5) {
+                display: none;
+            }
+            
+            .formateur-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container formateurs-container">
+    <div class="page-header">
+        <h1>Liste des Formateurs</h1>
+        <a href="{{ path('formateur_ajouter') }}" class="add-btn">
+            <i class="fas fa-plus-circle"></i> Ajouter un Formateur
+        </a>
+    </div>
+    
+    <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="formateurSearch" class="search-input" placeholder="Rechercher un formateur...">
+    </div>
+    
+    <div class="view-toggle">
+        <button class="view-btn active" data-view="grid">
+            <i class="fas fa-th-large"></i> Cartes
+        </button>
+        <button class="view-btn" data-view="table">
+            <i class="fas fa-list"></i> Tableau
+        </button>
+    </div>
+    
+    <!-- Vue Grille (par défaut) -->
+    <div class="formateurs-grid" id="gridView">
+        {% for formateur in formateurs %}
+            <div class="formateur-card">
+                <div class="formateur-header">
+                    <div class="formateur-avatar">
+                        {% if formateur.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ formateur.photo) }}" alt="{{ formateur.prenom }} {{ formateur.nom }}">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="formateur-info">
+                        <div class="formateur-name">{{ formateur.prenom }} {{ formateur.nom }}</div>
+                        <div class="formateur-email">{{ formateur.email }}</div>
+                        <div class="formateur-phone">
+                            <i class="fas fa-phone-alt"></i> {{ formateur.telephone ?? 'Non renseigné' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="formateur-body">
+                    <p class="formateur-bio">{{ formateur.biographie ?? 'Aucune biographie disponible' }}</p>
+                    
+                    {% if formateur.competences|length > 0 %}
+                        <div class="formateur-specialties mb-3">
+                            {% for competence in formateur.competences %}
+                                <span class="badge-specialty">{{ competence }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="formateur-actions">
+                        <a href="{{ path('formateur_voir', {id: formateur.id}) }}" class="action-btn btn-view">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                        <a href="{{ path('formateur_modifier', {id: formateur.id}) }}" class="action-btn btn-edit">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="action-btn btn-delete" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?')">
+                            <i class="fas fa-trash-alt"></i> Supprimer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info col-12">
+                <i class="fas fa-info-circle me-2"></i> Aucun formateur n'est enregistré actuellement.
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Vue Tableau (cachée par défaut) -->
+    <div class="table-responsive" id="tableView" style="display: none;">
+        <table class="table formateurs-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Date de Naissance</th>
+                    <th>Biographie</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for formateur in formateurs %}
+                <tr>
+                    <td class="fw-bold">
+                        {% if formateur.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ formateur.photo) }}" alt="{{ formateur.prenom }}" 
+                                 style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                        {% else %}
+                            <span class="d-inline-flex align-items-center justify-content-center bg-secondary text-white rounded-circle me-2" 
+                                  style="width: 30px; height: 30px;">
+                                <i class="fas fa-user" style="font-size: 12px;"></i>
+                            </span>
+                        {% endif %}
+                        {{ formateur.prenom }} {{ formateur.nom }}
+                    </td>
+                    <td>{{ formateur.email }}</td>
+                    <td>{{ formateur.telephone ?? 'Non renseigné' }}</td>
+                    <td>{{ formateur.dateNaissance ? formateur.dateNaissance|date('d/m/Y') : 'Non renseignée' }}</td>
+                    <td>{{ formateur.biographie ? formateur.biographie|slice(0, 50) ~ '...' : 'Aucune biographie' }}</td>
+                    <td>
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{{ path('formateur_voir', {id: formateur.id}) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ path('formateur_modifier', {id: formateur.id}) }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?')" data-bs-toggle="tooltip" title="Supprimer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucun formateur n'est enregistré actuellement.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Basculement entre vues Tableau et Grille
+        const viewBtns = document.querySelectorAll('.view-btn');
+        const gridView = document.getElementById('gridView');
+        const tableView = document.getElementById('tableView');
+        
+        viewBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                viewBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                if (this.getAttribute('data-view') === 'grid') {
+                    gridView.style.display = 'grid';
+                    tableView.style.display = 'none';
+                } else {
+                    gridView.style.display = 'none';
+                    tableView.style.display = 'block';
+                }
+            });
+        });
+        
+        // Fonction de recherche
+        const searchInput = document.getElementById('formateurSearch');
+        const formateurCards = document.querySelectorAll('.formateur-card');
+        const tableRows = document.querySelectorAll('.formateurs-table tbody tr');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            // Recherche dans la vue Grille
+            formateurCards.forEach(card => {
+                const formateurName = card.querySelector('.formateur-name').textContent.toLowerCase();
+                const formateurEmail = card.querySelector('.formateur-email').textContent.toLowerCase();
+                const formateurBio = card.querySelector('.formateur-bio').textContent.toLowerCase();
+                
+                if (formateurName.includes(searchTerm) || formateurEmail.includes(searchTerm) || formateurBio.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Recherche dans la vue Tableau
+            tableRows.forEach(row => {
+                if (row.textContent.toLowerCase().includes(searchTerm)) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Initialiser les tooltips pour les boutons d'action dans la vue tableau
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

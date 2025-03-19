@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .reset-container {
+            max-width: 450px;
+            margin: 2rem auto;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #4a69bb, #6E8BD6);
+            border-bottom: none;
+        }
+        .form-hint {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="reset-container">
+    <div class="card">
+        <div class="card-header text-white text-center">
+            <h1 class="h3 mb-0">Réinitialiser votre mot de passe</h1>
+        </div>
+        <div class="card-body p-4">
+            {% for flash_error in app.flashes('reset_password_error') %}
+                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+            {% endfor %}
+
+            <p class="form-hint text-center">
+                Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe
+            </p>
+
+            {{ form_start(requestForm) }}
+                <div class="mb-3">
+                    {{ form_label(requestForm.email, 'Adresse e-mail', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        {{ form_widget(requestForm.email, {'attr': {'class': 'form-control', 'placeholder': 'votre@email.com'}}) }}
+                    </div>
+                    {{ form_help(requestForm.email) }}
+                    {{ form_errors(requestForm.email) }}
+                </div>
+
+                <button class="btn btn-primary w-100 mt-3">
+                    <i class="fas fa-paper-plane me-2"></i>Envoyer le lien de réinitialisation
+                </button>
+            {{ form_end(requestForm) }}
+        </div>
+        <div class="card-footer text-center py-3">
+            <a href="{{ path('app_login') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-1"></i>Retour à la connexion
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

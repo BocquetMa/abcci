@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Inscription{% endblock %}
+
+{% block body %}
+<div class="container mx-auto mt-10">
+    <h1 class="text-2xl font-bold mb-6">Nouvelle Inscription</h1>
+
+    {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+        {{ form_row(form.formations, {'attr': {'class': 'mt-1 block w-full'}}) }}
+        {{ form_row(form.nombrePlaces, {'attr': {'class': 'mt-1 block w-full'}}) }}
+        
+        {# On peut cacher le champ utilisateur si on utilise l'utilisateur connecté #}
+        {% if is_granted('ROLE_ADMIN') %}
+            {{ form_row(form.utilisateur, {'attr': {'class': 'mt-1 block w-full'}}) }}
+        {% endif %}
+
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            S'inscrire
+        </button>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

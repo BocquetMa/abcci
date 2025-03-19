@@ -1,0 +1,399 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .notification-form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .notification-form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        background: linear-gradient(90deg, #4A6CF7, #5E9EF8);
+    }
+    
+    .notification-form-title {
+        color: #2F3542;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+        position: relative;
+    }
+    
+    .notification-form-title::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #4A6CF7, #5E9EF8);
+    }
+    
+    .notification-form-icon {
+        color: #4A6CF7;
+        margin-right: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.8rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #3A4452;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #E9ECEF;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: #4A6CF7;
+        box-shadow: 0 0 0 0.2rem rgba(74, 108, 247, 0.15);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .notification-type-select {
+        position: relative;
+    }
+    
+    .notification-select {
+        appearance: none;
+        padding-right: 2.5rem;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233A4452' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem;
+    }
+    
+    .notification-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+    }
+    
+    .btn-notification-send {
+        background: linear-gradient(90deg, #4A6CF7, #5E9EF8);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-notification-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
+    }
+    
+    .btn-notification-send i {
+        margin-right: 0.5rem;
+    }
+    
+    .btn-notification-reset {
+        background: white;
+        color: #6c757d;
+        border: 2px solid #E9ECEF;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-notification-reset:hover {
+        background: #f8f9fa;
+        color: #5a6268;
+    }
+    
+    .notification-type-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .type-formation {
+        background-color: rgba(52, 191, 163, 0.1);
+        color: #34BFA3;
+    }
+    
+    .type-inscription {
+        background-color: rgba(74, 108, 247, 0.1);
+        color: #4A6CF7;
+    }
+    
+    .type-paiement {
+        background-color: rgba(255, 184, 34, 0.1);
+        color: #FFB822;
+    }
+    
+    .type-messagerie {
+        background-color: rgba(103, 58, 183, 0.1);
+        color: #673AB7;
+    }
+    
+    .type-quiz {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #F44336;
+    }
+    
+    .notification-preview {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 4px solid #4A6CF7;
+    }
+    
+    .notification-preview-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2F3542;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notification-preview-content {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    /* Animation pour le prévisualisation */
+    .fade-in {
+        animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notification-form-container {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .notification-form-title {
+            font-size: 1.8rem;
+        }
+        
+        .notification-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn-notification-send,
+        .btn-notification-reset {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="notification-form-container">
+        <h1 class="notification-form-title">
+            <i class="fas fa-bell notification-form-icon"></i>
+            Créer une notification
+        </h1>
+        
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success fade-in mb-4">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ message }}
+            </div>
+        {% endfor %}
+        
+        <form method="POST" id="notificationForm">
+            <div class="form-group">
+                <label class="form-label" for="notification-titre">
+                    <i class="fas fa-heading me-1"></i>
+                    Titre
+                </label>
+                <input type="text" name="titre" id="notification-titre" class="form-control" 
+                       placeholder="Entrez le titre de la notification" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="notification-contenu">
+                    <i class="fas fa-align-left me-1"></i>
+                    Contenu
+                </label>
+                <textarea name="contenu" id="notification-contenu" class="form-control" 
+                          placeholder="Décrivez le contenu de votre notification..." required></textarea>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="notification-type">
+                            <i class="fas fa-tag me-1"></i>
+                            Type de Notification
+                        </label>
+                        <div class="notification-type-select">
+                            <select name="type" id="notification-type" class="form-control notification-select" onchange="updateTypePreview()">
+                                {% for label, value in types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="notification-destinataire">
+                            <i class="fas fa-users me-1"></i>
+                            Destinataires
+                        </label>
+                        <div class="notification-type-select">
+                            <select name="destinataire" id="notification-destinataire" class="form-control notification-select" onchange="updateRecipientsCount()">
+                                <option value="tous">Tous les utilisateurs</option>
+                                <option value="utilisateurs">Utilisateurs</option>
+                                <option value="formateurs">Formateurs</option>
+                                <option value="admins">Administrateurs</option>
+                            </select>
+                        </div>
+                        <small id="recipients-count" class="form-text text-muted mt-2">
+                            <i class="fas fa-info-circle"></i>
+                            Cette notification sera envoyée à environ <span>tous les</span> utilisateurs.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notification-preview fade-in" id="notification-preview">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="notification-preview-title mb-0">Aperçu de la notification</h4>
+                    <span class="notification-type-badge type-formation" id="preview-badge">Formation</span>
+                </div>
+                <h5 id="preview-title">Titre de la notification</h5>
+                <p class="notification-preview-content" id="preview-content">Contenu de la notification...</p>
+            </div>
+            
+            <div class="notification-actions">
+                <button type="button" class="btn btn-notification-reset" onclick="resetForm()">
+                    <i class="fas fa-undo"></i> Réinitialiser
+                </button>
+                <button type="submit" class="btn btn-notification-send">
+                    <i class="fas fa-paper-plane"></i> Envoyer la notification
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser l'aperçu
+        updateNotificationPreview();
+        
+        // Ajouter des écouteurs d'événements pour la mise à jour en temps réel
+        document.getElementById('notification-titre').addEventListener('input', updateNotificationPreview);
+        document.getElementById('notification-contenu').addEventListener('input', updateNotificationPreview);
+        document.getElementById('notification-type').addEventListener('change', updateNotificationPreview);
+    });
+    
+    function updateNotificationPreview() {
+        const title = document.getElementById('notification-titre').value || 'Titre de la notification';
+        const content = document.getElementById('notification-contenu').value || 'Contenu de la notification...';
+        const type = document.getElementById('notification-type').options[document.getElementById('notification-type').selectedIndex].text;
+        
+        document.getElementById('preview-title').textContent = title;
+        document.getElementById('preview-content').textContent = content;
+        
+        // Mettre à jour le badge de type
+        const badge = document.getElementById('preview-badge');
+        badge.textContent = type;
+        
+        // Réinitialiser toutes les classes de type
+        badge.className = 'notification-type-badge';
+        
+        // Ajouter la classe appropriée en fonction du type
+        switch(type.toLowerCase()) {
+            case 'formation':
+                badge.classList.add('type-formation');
+                break;
+            case 'inscription':
+                badge.classList.add('type-inscription');
+                break;
+            case 'paiement':
+                badge.classList.add('type-paiement');
+                break;
+            case 'messagerie':
+                badge.classList.add('type-messagerie');
+                break;
+            case 'quiz':
+                badge.classList.add('type-quiz');
+                break;
+            default:
+                badge.classList.add('type-formation');
+        }
+    }
+    
+    function updateTypePreview() {
+        updateNotificationPreview();
+    }
+    
+    function updateRecipientsCount() {
+        const select = document.getElementById('notification-destinataire');
+        const recipientText = document.querySelector('#recipients-count span');
+        
+        switch(select.value) {
+            case 'tous':
+                recipientText.textContent = 'tous les';
+                break;
+            case 'utilisateurs':
+                recipientText.textContent = 'tous les utilisateurs standard';
+                break;
+            case 'formateurs':
+                recipientText.textContent = 'tous les formateurs';
+                break;
+            case 'admins':
+                recipientText.textContent = 'tous les administrateurs';
+                break;
+        }
+    }
+    
+    function resetForm() {
+        document.getElementById('notificationForm').reset();
+        updateNotificationPreview();
+        updateRecipientsCount();
+    }
+</script>
+{% endblock %}

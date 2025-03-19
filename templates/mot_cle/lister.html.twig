@@ -1,0 +1,49 @@
+{# templates/mot_cle/lister.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Liste des mots-clés</h1>
+        
+        <a href="{{ path('mot_cle_ajouter') }}" class="btn btn-primary mb-3">
+            <i class="fas fa-plus"></i> Ajouter un mot-clé
+        </a>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Libellé</th>
+                        <th>Nombre de formations</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for motCle in motsCles %}
+                        <tr>
+                            <td>{{ motCle.id }}</td>
+                            <td>{{ motCle.libelle }}</td>
+                            <td>{{ motCle.formations|length }}</td>
+                            <td>
+                                <a href="{{ path('mot_cle_modifier', {'id': motCle.id}) }}" 
+                                   class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <a href="{{ path('mot_cle_supprimer', {'id': motCle.id}) }}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce mot-clé ?')">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">Aucun mot-clé trouvé</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

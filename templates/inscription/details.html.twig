@@ -1,0 +1,140 @@
+{# templates/inscription/details.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'inscription - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Détails de l'inscription</h2>
+                    <div>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('inscription_admin_liste') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        {% elseif is_granted('ROLE_FORMATEUR') and app.user == inscription.formation.formateur %}
+                            <a href="{{ path('inscription_formateur_liste') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        {% else %}
+                            <a href="{{ path('profil_inscriptions') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à mes inscriptions
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>Informations sur l'inscription</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Statut</dt>
+                                <dd class="col-sm-8">
+                                    {% if inscription.statut == 'en_attente' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif inscription.statut == 'acceptee' %}
+                                        <span class="badge bg-success">Acceptée</span>
+                                    {% elseif inscription.statut == 'refusee' %}
+                                        <span class="badge bg-danger">Refusée</span>
+                                    {% endif %}
+                                </dd>
+                                
+                                <dt class="col-sm-4">Participant</dt>
+                                <dd class="col-sm-8">{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</dd>
+                                
+                                <dt class="col-sm-4">Date de demande</dt>
+                                <dd class="col-sm-8">{{ inscription.dateInscription|date('d/m/Y H:i') }}</dd>
+                                
+                                {% if inscription.motif %}
+                                    <dt class="col-sm-4">
+                                        {% if inscription.statut == 'en_attente' %}
+                                            Motivation
+                                        {% else %}
+                                            Motif
+                                        {% endif %}
+                                    </dt>
+                                    <dd class="col-sm-8">{{ inscription.motif }}</dd>
+                                {% endif %}
+                                
+                                {% if inscription.dateConfirmation %}
+                                    <dt class="col-sm-4">Date de traitement</dt>
+                                    <dd class="col-sm-8">{{ inscription.dateConfirmation|date('d/m/Y H:i') }}</dd>
+                                {% endif %}
+                                
+                                {% if inscription.validePar %}
+                                    <dt class="col-sm-4">Validé par</dt>
+                                    <dd class="col-sm-8">{{ inscription.validePar.prenom }} {{ inscription.validePar.nom }}</dd>
+                                {% endif %}
+                                
+                                {% if inscription.estTerminee %}
+                                    <dt class="col-sm-4">Formation terminée</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-info">Oui</span>
+                                    </dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Détails de la formation</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Formation</dt>
+                                <dd class="col-sm-8">
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                </dd>
+                                
+                                <dt class="col-sm-4">Formateur</dt>
+                                <dd class="col-sm-8">{{ inscription.formation.formateur.prenom }} {{ inscription.formation.formateur.nom }}</dd>
+                                
+                                <dt class="col-sm-4">Période prévue</dt>
+                                <dd class="col-sm-8">
+                                    {% if inscription.dateDebut and inscription.dateFin %}
+                                        Du {{ inscription.dateDebut|date('d/m/Y') }} au {{ inscription.dateFin|date('d/m/Y') }}
+                                    {% else %}
+                                        Non définie
+                                    {% endif %}
+                                </dd>
+                                
+                                <dt class="col-sm-4">Places</dt>
+                                <dd class="col-sm-8">{{ inscription.formation.placesDisponibles }} disponibles sur {{ inscription.formation.nombrePlaces }}</dd>
+                                
+                                {% if inscription.formation.lieu %}
+                                    <dt class="col-sm-4">Lieu</dt>
+                                    <dd class="col-sm-8">{{ inscription.formation.lieu }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    {% if inscription.statut == 'en_attente' %}
+                        <div class="alert alert-warning">
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Cette inscription est en attente de validation par le formateur ou l'administrateur.
+                            </p>
+                        </div>
+                        
+                        {% if app.user == inscription.formation.formateur or is_granted('ROLE_ADMIN') %}
+                            <div class="d-flex justify-content-center mt-4">
+                                <a href="{{ path('inscription_valider', {id: inscription.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-check me-2"></i>Traiter cette demande
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% elseif inscription.statut == 'acceptee' and not inscription.estTerminee and (app.user == inscription.formation.formateur or is_granted('ROLE_ADMIN')) %}
+                        <div class="d-flex justify-content-center mt-4">
+                            <a href="{{ path('inscription_terminer', {id: inscription.id}) }}" class="btn btn-success" onclick="return confirm('Êtes-vous sûr de vouloir marquer cette formation comme terminée ?')">
+                                <i class="fas fa-check-circle me-2"></i>Marquer comme terminée
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

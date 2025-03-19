@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche avancée{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <h1>Recherche avancée</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="advanced-search-form" method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Thème</label>
+                    <select name="theme" class="form-select">
+                        <option value="">Tous les thèmes</option>
+                        {% for theme in themes %}
+                            <option value="{{ theme }}" {{ filters.theme == theme ? 'selected' }}>
+                                {{ theme }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Niveau</label>
+                    <select name="niveau" class="form-select">
+                        <option value="">Tous les niveaux</option>
+                        {% for niveau in niveaux %}
+                            <option value="{{ niveau }}" {{ filters.niveau == niveau ? 'selected' }}>
+                                {{ niveau }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Date de début</label>
+                    <input type="text" name="dateDebut" class="form-control datepicker" 
+                           value="{{ filters.dateDebut }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Date de fin</label>
+                    <input type="text" name="dateFin" class="form-control datepicker" 
+                           value="{{ filters.dateFin }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Prix minimum</label>
+                    <input type="number" name="prixMin" class="form-control" 
+                           value="{{ filters.prixMin }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Prix maximum</label>
+                    <input type="number" name="prixMax" class="form-control" 
+                           value="{{ filters.prixMax }}">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Mots-clés</label>
+                    <select name="motsCles[]" class="form-select select2" multiple>
+                        {% for motCle in motsCles %}
+                            <option value="{{ motCle.id }}" 
+                                {{ motCle.id in filters.motsCles|default([]) ? 'selected' }}>
+                                {{ motCle.libelle }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        <input type="checkbox" name="placesDisponibles" class="form-check-input" 
+                               id="placesDisponibles" {{ filters.placesDisponibles ? 'checked' }}>
+                        <label class="form-check-label" for="placesDisponibles">
+                            Formations avec places disponibles uniquement
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Rechercher
+                    </button>
+                    <a href="{{ path('formation_filtres_avances') }}" class="btn btn-secondary">
+                        <i class="fas fa-redo me-1"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="search-results">
+        {% include 'formation/_resultats_filtres.html.twig' with {'formations': formations} %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialisation de Flatpickr pour les dates
+            flatpickr(".datepicker", {
+                locale: "fr",
+                dateFormat: "Y-m-d",
+                allowInput: true
+            });
+
+            // Initialisation de Select2 pour les mots-clés
+            $('.select2').select2({
+                placeholder: "Sélectionnez des mots-clés",
+                allowClear: true
+            });
+
+            // Gestion de la recherche en AJAX
+            const form = document.getElementById('advanced-search-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const queryString = new URLSearchParams(formData).toString();
+
+                fetch(`${form.action}?${queryString}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('search-results').innerHTML = html;
+                    });
+            });
+        });
+    </script>
+{% endblock %}

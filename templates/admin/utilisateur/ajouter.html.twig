@@ -1,0 +1,12 @@
+{# templates/admin/utilisateur/ajouter.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un Utilisateur{% endblock %}
+
+{% block body %}
+    <h1>Ajouter un Utilisateur</h1>
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="btn btn-success">Créer</button>
+    {{ form_end(form) }}
+{% endblock %}

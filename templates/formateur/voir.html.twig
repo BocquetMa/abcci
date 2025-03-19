@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Formateur{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Détails du Formateur</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ formateur.prenom }} {{ formateur.nom }}</h5>
+            <p class="card-text"><strong>Email:</strong> {{ formateur.email }}</p>
+            <p class="card-text"><strong>Téléphone:</strong> {{ formateur.telephone ?? 'Non renseigné' }}</p>
+            <p class="card-text"><strong>Date de Naissance:</strong> 
+                {{ formateur.dateNaissance ? formateur.dateNaissance|date('d/m/Y') : 'Non renseignée' }}
+            </p>
+            <p class="card-text">
+                <strong>Biographie:</strong><br>
+                {{ formateur.biographie|nl2br }}
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ path('formateur_lister') }}" class="btn btn-secondary">Retour à la liste</a>
+        <a href="{{ path('formateur_modifier', {id: formateur.id}) }}" class="btn btn-warning">Modifier</a>
+    </div>
+</div>
+{% endblock %}

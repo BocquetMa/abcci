@@ -1,0 +1,107 @@
+{# templates/profil/badges.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes badges - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-3">
+            {% include 'profil/_sidebar.html.twig' with {active: 'badges'} %}
+        </div>
+        <div class="col-md-9">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Mes badges</h2>
+                    <div>
+                        <span class="badge bg-primary">{{ total_badges }} badges</span>
+                        <span class="badge bg-success">{{ total_points }} points</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if total_badges > 0 %}
+                        <div class="mb-4">
+                            <h3>Badges de quiz</h3>
+                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_QUIZ')] is not empty %}
+                                <div class="row row-cols-2 row-cols-md-4 g-4">
+                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_QUIZ')] %}
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-body text-center">
+                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
+                                                    <h5 class="card-title">{{ badge.nom }}</h5>
+                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
+                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
+                                                </div>
+                                                <div class="card-footer text-muted small">
+                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Vous n'avez pas encore obtenu de badge de quiz.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h3>Badges de formation</h3>
+                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_FORMATION')] is not empty %}
+                                <div class="row row-cols-2 row-cols-md-4 g-4">
+                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_FORMATION')] %}
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-body text-center">
+                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
+                                                    <h5 class="card-title">{{ badge.nom }}</h5>
+                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
+                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
+                                                </div>
+                                                <div class="card-footer text-muted small">
+                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Vous n'avez pas encore obtenu de badge de formation.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h3>Autres réalisations</h3>
+                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_ACHIEVEMENT')] is not empty %}
+                                <div class="row row-cols-2 row-cols-md-4 g-4">
+                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_ACHIEVEMENT')] %}
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-body text-center">
+                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
+                                                    <h5 class="card-title">{{ badge.nom }}</h5>
+                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
+                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
+                                                </div>
+                                                <div class="card-footer text-muted small">
+                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Vous n'avez pas encore obtenu d'autres badges.</p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>Vous n'avez pas encore obtenu de badge. Complétez des quiz et des formations pour en gagner !</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

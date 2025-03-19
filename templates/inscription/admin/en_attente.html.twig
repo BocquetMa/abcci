@@ -1,0 +1,78 @@
+{# templates/inscription/formateur/en_attente.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscriptions en attente - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-3">
+            {% include 'formateur/_sidebar.html.twig' with {active: 'inscriptions_attente'} %}
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Inscriptions en attente</h2>
+                    <a href="{{ path('inscription_formateur_liste') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-list me-1"></i>Toutes les inscriptions
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if inscriptions|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Formation</th>
+                                        <th>Participant</th>
+                                        <th>Date de demande</th>
+                                        <th>Places disponibles</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inscription in inscriptions %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}" class="text-decoration-none">
+                                                    {{ inscription.formation.titre }}
+                                                </a>
+                                            </td>
+                                            <td>{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</td>
+                                            <td>{{ inscription.dateInscription|date('d/m/Y H:i') }}</td>
+                                            <td>
+                                                {% if inscription.formation.placesDisponibles > 0 %}
+                                                    <span class="badge bg-success">{{ inscription.formation.placesDisponibles }} places</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Complet</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ path('inscription_valider', {id: inscription.id}) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-check me-1"></i>Traiter
+                                                    </a>
+                                                    <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Aucune inscription en attente pour vos formations.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

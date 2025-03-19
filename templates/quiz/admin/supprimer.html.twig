@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supprimer un Quiz{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 700px;
+        }
+        
+        .page-header {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        
+        .page-header h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        .admin-link {
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .admin-link:hover {
+            transform: translateX(-3px);
+        }
+        
+        .admin-link i {
+            margin-right: 0.5rem;
+        }
+        
+        .delete-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .delete-warning h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .delete-warning h3 i {
+            color: #ffc107;
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+        
+        .delete-warning p {
+            margin-bottom: 0.75rem;
+        }
+        
+        .delete-warning p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .delete-confirmation {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quiz-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .quiz-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quiz-detail {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .quiz-detail i {
+            color: var(--primary);
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .btn-action {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-action i {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            box-shadow: 0 4px 6px rgba(220, 53, 69, 0.15);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(220, 53, 69, 0.2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9ecef;
+            color: var(--dark);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container admin-container">
+    <a href="{{ path('quiz_admin_liste') }}" class="admin-link">
+        <i class="fas fa-arrow-left"></i> Retour à la liste des quiz
+    </a>
+    
+    <div class="page-header">
+        <h1>Supprimer le quiz</h1>
+        <p class="text-muted">Cette action est irréversible</p>
+    </div>
+    
+    <div class="delete-warning">
+        <h3><i class="fas fa-exclamation-triangle"></i> Attention !</h3>
+        <p>Vous êtes sur le point de supprimer définitivement ce quiz. Cette action entrainera la suppression de :</p>
+        <ul>
+            <li>Toutes les questions associées à ce quiz</li>
+            <li>Toutes les réponses associées à ces questions</li>
+            <li>Tous les résultats et tentatives des apprenants</li>
+        </ul>
+        <p><strong>Cette action est irréversible et les données ne pourront pas être récupérées.</strong></p>
+    </div>
+    
+    <div class="quiz-info">
+        <div class="quiz-title">{{ quiz.titre }}</div>
+        <div class="quiz-detail">
+            <i class="fas fa-graduation-cap"></i> Formation: {{ formation.titre }}
+        </div>
+        <div class="quiz-detail">
+            <i class="fas fa-question-circle"></i> {{ quiz.questions|length }} question(s)
+        </div>
+        <div class="quiz-detail">
+            <i class="fas fa-users"></i> {{ quiz.tentatives|length }} tentative(s) par les apprenants
+        </div>
+        <div class="quiz-detail">
+            <i class="fas fa-calendar-alt"></i> Créé le {{ quiz.dateCreation|date('d/m/Y') }}
+        </div>
+    </div>
+    
+    <div class="delete-confirmation">
+        <form method="post">
+            <p class="fw-bold text-danger">Pour confirmer la suppression, veuillez saisir le titre du quiz :</p>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="confirmationText" name="confirmationText" required>
+            </div>
+            
+            <div class="form-buttons">
+                <a href="{{ path('quiz_admin_liste') }}" class="btn btn-secondary btn-action">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+                
+                <button type="submit" class="btn btn-danger btn-action" id="deleteButton" disabled>
+                    <i class="fas fa-trash-alt"></i> Supprimer définitivement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationInput = document.getElementById('confirmationText');
+    const deleteButton = document.getElementById('deleteButton');
+    const quizTitle = "{{ quiz.titre }}";
+    
+    confirmationInput.addEventListener('input', function() {
+        // Activer le bouton de suppression uniquement si le texte correspond exactement au titre du quiz
+        deleteButton.disabled = this.value !== quizTitle;
+    });
+});
+</script>
+{% endblock %}

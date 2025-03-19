@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>{{ mot_cle.id ? 'Modifier' : 'Ajouter' }} un mot-clé</h1>
+
+        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+            <div class="mb-3">
+                {{ form_row(form.libelle, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Entrez le libellé du mot-clé'
+                    }
+                }) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 
+                {{ mot_cle.id ? 'Modifier' : 'Ajouter' }}
+            </button>
+            
+            <a href="{{ path('mot_cle_lister') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

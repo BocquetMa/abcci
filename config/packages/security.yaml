@@ -1,0 +1,50 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\Utilisateur
+                property: email
+
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_FORMATEUR]
+        ROLE_FORMATEUR: ROLE_USER
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            lazy: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\LoginFormAuthenticator
+                - App\Security\GoogleAuthenticator
+                
+            entry_point: App\Security\LoginFormAuthenticator
+            
+            logout:
+                path: app_logout
+                target: app_login  # Ajout de la redirection après déconnexion
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                always_remember_me: true
+
+    access_control:
+        - { path: ^/login, roles: PUBLIC_ACCESS }  # Ajout pour permettre l'accès à la page de connexion
+        - { path: ^/register, roles: PUBLIC_ACCESS }  # Ajout pour permettre l'accès à la page d'inscription
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/document/upload, roles: ROLE_ADMIN }
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

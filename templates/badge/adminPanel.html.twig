@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord des Badges{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Tableau de bord des Badges</h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Statistiques Générales</div>
+                <div class="card-body">
+                    <p>Nombre total de badges : {{ statistiques.total_badges }}</p>
+                    <p>Utilisateurs avec badges : {{ statistiques.utilisateurs_avec_badges }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Répartition des Badges</div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Type de Badge</th>
+                                <th>Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for badge_type in statistiques.badges_par_type %}
+                                <tr>
+                                    <td>{{ badge_type.type }}</td>
+                                    <td>{{ badge_type.nombre }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Top Badges</div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom du Badge</th>
+                                <th>Type</th>
+                                <th>Occurrences</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for badge in statistiques.top_badges %}
+                                <tr>
+                                    <td>{{ badge.nom }}</td>
+                                    <td>{{ badge.type }}</td>
+                                    <td>{{ badge.occurrences }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

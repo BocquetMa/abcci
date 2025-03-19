@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Planning de Formations{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <h1>Mon Planning de Formations</h1>
+
+    {% if planning|length > 0 %}
+        {% for date, formations in planning %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ date|date('d/m/Y') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% for formation in formations %}
+                        <div class="mb-3 p-3 border-bottom {% if not loop.last %}border-bottom{% endif %}">
+                            <h6 class="text-primary">{{ formation.titre }}</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <i class="fas fa-clock"></i>
+                                        <strong>Durée :</strong> {{ formation.duree }}h
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="fas fa-tag"></i>
+                                        <strong>Thème :</strong> {{ formation.theme }}
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="fas fa-layer-group"></i>
+                                        <strong>Niveau :</strong> {{ formation.niveau }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <strong>Période :</strong><br>
+                                        Du {{ formation.dateDebut|date('d/m/Y') }}<br>
+                                        au {{ formation.dateFin|date('d/m/Y') }}
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-user-tie"></i>
+                                        <strong>Formateur :</strong><br>
+                                        {{ formation.formateur.nom }} {{ formation.formateur.prenom }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            Vous n'êtes inscrit(e) à aucune formation validée pour le moment.
+            <br>
+            <a href="{{ path('formation_lister') }}" class="btn btn-primary mt-3">
+                Voir les formations disponibles
+            </a>
+        </div>
+    {% endif %}
+
+    <a href="{{ path('profil_index') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour au profil
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}ABCCI Formation{% endblock %}</title>
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+        {% block stylesheets %}
+        <style>
+            :root {
+                --primary: #0D6EFD;
+                --primary-dark: #0143a3;
+                --primary-light: #e6f0ff;
+                --secondary: #6C757D;
+                --success: #198754;
+                --danger: #DC3545;
+                --warning: #FFC107;
+                --info: #0DCAF0;
+                --light: #F8F9FA;
+                --dark: #212529;
+                --body-bg: #f5f8fa;
+                --sidebar-width: 280px;
+                --header-height: 70px;
+                --border-radius: 10px;
+                --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                --transition: all 0.3s ease;
+            }
+            
+            /* Base Styles */
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: var(--body-bg);
+                color: var(--dark);
+                min-height: 100vh;
+                overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Typography */
+            h1, h2, h3, h4, h5, h6 {
+                font-weight: 600;
+            }
+            
+            /* Container adjustments */
+            .container-fluid {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            /* Navbar */
+            .navbar {
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                padding: 0.75rem 1rem;
+                box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+                height: var(--header-height);
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 1030;
+            }
+            
+            .navbar-brand {
+                font-weight: 700;
+                font-size: 1.4rem;
+                color: white !important;
+                display: flex;
+                align-items: center;
+            }
+            
+            .nav-link {
+                font-weight: 500;
+                padding: 0.5rem 1rem;
+                transition: var(--transition);
+                color: rgba(255, 255, 255, 0.9) !important;
+                position: relative;
+            }
+            
+            .nav-link:hover {
+                color: white !important;
+                transform: translateY(-2px);
+            }
+            
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                width: 0;
+                height: 2px;
+                background: white;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                transition: var(--transition);
+            }
+            
+            .nav-link:hover::after,
+            .nav-link.active::after {
+                width: 60%;
+            }
+            
+            /* Main content */
+            .main-content {
+                padding-top: var(--header-height);
+                flex: 1;
+            }
+            
+            /* Cards */
+            .card {
+                border-radius: var(--border-radius);
+                border: none;
+                box-shadow: var(--box-shadow);
+                transition: var(--transition);
+                overflow: hidden;
+                background: white;
+                margin-bottom: 1.5rem;
+            }
+            
+            .card:hover {
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                transform: translateY(-5px);
+            }
+            
+            .card-header {
+                background-color: transparent;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                padding: 1.25rem 1.5rem;
+                font-weight: 600;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            /* Buttons */
+            .btn {
+                font-weight: 500;
+                border-radius: 5px;
+                padding: 0.5rem 1.25rem;
+                transition: var(--transition);
+                box-shadow: var(--box-shadow);
+            }
+            
+            .btn-primary {
+                background-color: var(--primary);
+                border-color: var(--primary);
+            }
+            
+            .btn-primary:hover {
+                background-color: var(--primary-dark);
+                border-color: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.15);
+            }
+            
+            .btn-outline-primary {
+                color: var(--primary);
+                border-color: var(--primary);
+            }
+            
+            .btn-outline-primary:hover {
+                color: white;
+                background-color: var(--primary);
+                border-color: var(--primary);
+                transform: translateY(-2px);
+            }
+            
+            /* Forms */
+            .form-control, .form-select {
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-radius: var(--border-radius);
+                padding: 0.75rem 1rem;
+                transition: var(--transition);
+                font-size: 0.95rem;
+            }
+            
+            .form-control:focus, .form-select:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+            
+            .form-label {
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+                color: var(--dark);
+            }
+            
+            /* User Profile */
+            .nav-profile-img {
+                width: 40px;
+                height: 40px;
+                object-fit: cover;
+                border-radius: 50%;
+                border: 2px solid rgba(255, 255, 255, 0.8);
+                transition: var(--transition);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .nav-profile-img:hover {
+                transform: scale(1.1);
+                border-color: white;
+            }
+            
+            .user-dropdown {
+                min-width: 320px;
+                border-radius: 10px;
+                overflow: hidden;
+                padding: 0;
+                border: none;
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+                animation: fadeIn 0.3s;
+            }
+            
+            .user-dropdown .user-header {
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                padding: 1.5rem;
+                text-align: center;
+                color: white;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .user-dropdown .user-header::before {
+                content: "";
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(rgba(255, 255, 255, 0.1), transparent);
+                opacity: 0.5;
+            }
+            
+            .user-dropdown .user-header img {
+                width: 80px;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 50%;
+                border: 3px solid rgba(255, 255, 255, 0.8);
+                margin-bottom: 0.75rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .user-dropdown .user-header h6 {
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+                font-size: 1.1rem;
+            }
+            
+            .badge-role {
+                background-color: rgba(255, 255, 255, 0.2);
+                color: white;
+                font-size: 0.75rem;
+                padding: 0.35rem 0.75rem;
+                border-radius: 50px;
+                margin-top: 0.5rem;
+                display: inline-block;
+                font-weight: 500;
+            }
+            
+            .user-stats {
+                background-color: rgba(0, 0, 0, 0.02);
+                padding: 1rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+            
+            .user-stats h6 {
+                font-weight: 600;
+                color: var(--primary);
+                font-size: 1.1rem;
+                margin-bottom: 0;
+            }
+            
+            .user-stats small {
+                color: var(--secondary);
+                font-size: 0.8rem;
+            }
+            
+            .user-info {
+                padding: 1rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .user-info i {
+                color: var(--primary);
+            }
+            
+            .user-footer {
+                padding: 1rem 1.5rem;
+                background-color: rgba(0, 0, 0, 0.01);
+            }
+            
+            /* Notification Styles */
+            .notification-dot {
+                position: absolute;
+                top: 5px;
+                right: 10px;
+                width: 8px;
+                height: 8px;
+                background-color: var(--danger);
+                border-radius: 50%;
+                border: 2px solid var(--primary);
+                animation: pulse 2s infinite;
+            }
+            
+            @keyframes pulse {
+                0% {
+                    transform: scale(0.95);
+                    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+                }
+                
+                70% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+                }
+                
+                100% {
+                    transform: scale(0.95);
+                    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+                }
+            }
+            
+            /* Notifications Modal */
+            .modal-content {
+                border: none;
+                border-radius: var(--border-radius);
+                overflow: hidden;
+            }
+            
+            .modal-header {
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                color: white;
+                border-bottom: none;
+                padding: 1.25rem 1.5rem;
+            }
+            
+            .modal-body {
+                padding: 0;
+            }
+            
+            .list-group {
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            
+            .list-group-item {
+                border-left: none;
+                border-right: none;
+                padding: 1rem 1.5rem;
+                transition: var(--transition);
+            }
+            
+            .list-group-item:hover {
+                background-color: var(--primary-light);
+            }
+            
+            .list-group-item:first-child {
+                border-top: none;
+            }
+            
+            .list-group-item h6 {
+                font-weight: 600;
+                color: var(--dark);
+                margin-bottom: 0.5rem;
+            }
+            
+            .list-group-item p {
+                color: var(--secondary);
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .list-group-item .notification-time {
+                font-size: 0.8rem;
+                color: var(--secondary);
+            }
+            
+            .list-group-item.text-center {
+                background-color: var(--light);
+                font-weight: 500;
+                color: var(--primary);
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .navbar-brand {
+                    font-size: 1.2rem;
+                }
+                
+                .user-dropdown {
+                    min-width: 280px;
+                    position: fixed !important;
+                    top: 70px !important;
+                    right: 10px !important;
+                    left: auto !important;
+                }
+                
+                .container, .container-fluid {
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+            }
+            
+            /* Animation keyframes */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            /* Custom scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: #bbb;
+                border-radius: 10px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: #888;
+            }
+            
+            /* Footer */
+            footer {
+                background-color: var(--dark);
+                color: white;
+                padding: 2rem 0;
+                margin-top: auto;
+            }
+            
+            footer a {
+                color: rgba(255, 255, 255, 0.7);
+                text-decoration: none;
+                transition: var(--transition);
+            }
+            
+            footer a:hover {
+                color: white;
+            }
+        </style>
+        {% endblock %}
+    </head>
+    <body>
+        {% if app.user %}
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="{{ path('formation_lister') }}">
+                        <i class="fas fa-graduation-cap me-2"></i>ABCCI
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                             <li class="nav-item">
+                                <a class="nav-link {{ app.request.get('_route') starts with 'formation_' ? 'active' : '' }}" href="{{ path('formation_lister') }}">
+                                    <i class="fas fa-book me-1"></i>Formations
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ app.request.get('_route') starts with 'quiz_' and app.request.get('_route') != 'quiz_admin_liste' ? 'active' : '' }}" href="{{ path('quiz_formation_liste', {id: app.user.formations|first ? app.user.formations|first.id : 1}) }}">
+                                    <i class="fas fa-question-circle me-1"></i>Quiz
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link {{ app.request.get('_route') starts with 'messagerie_' ? 'active' : '' }}" href="{{ path('messagerie_index') }}">
+                                    <i class="fas fa-comments me-1"></i>Messagerie
+                                    <!-- Indicateur optionnel de nouveaux messages -->
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; transform: translateY(-25%);">
+                                        <!-- Vous pouvez ajouter un compteur ici si nécessaire -->
+                                        <span class="visually-hidden">nouveaux messages</span>
+                                    </span>
+                                </a>
+                            </li>
+                           {% if is_granted('ROLE_FORMATEUR') %}
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ app.request.get('_route') starts with 'formateur_' or app.request.get('_route') starts with 'quiz_admin_' ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-chalkboard-teacher me-1"></i>Espace Formateur
+                                    </a>
+                                    <div class="dropdown-menu animate__animated animate__fadeIn">
+                                        <a class="dropdown-item" href="{{ path('formateur_lister') }}">
+                                            <i class="fas fa-user-tie me-2"></i>Mes formations
+                                        </a>
+                                        <a class="dropdown-item" href="{{ path('quiz_admin_liste') }}">
+                                            <i class="fas fa-quiz me-2"></i>Gestion des quiz
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="{{ path('profil_inscriptions') }}">
+                                            <i class="fas fa-chart-bar me-2"></i>Inscriptions
+                                        </a>
+                                   
+                                    </div>
+                                </li>
+                            {% endif %}
+                           {% if is_granted('ROLE_ADMIN') %}
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle {{ app.request.get('_route') starts with 'admin_' or app.request.get('_route') starts with 'notification_' ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-users-cog me-1"></i>Administration
+                                    </a>
+                                    <div class="dropdown-menu animate__animated animate__fadeIn">
+                                        <a class="dropdown-item" href="{{ path('admin_utilisateur_index') }}">
+                                            <i class="fas fa-users me-2"></i>Utilisateurs
+                                        </a>
+                                        <a class="dropdown-item" href="{{ path('notification_creer') }}">
+                                            <i class="fas fa-bell me-2"></i>Notifications
+                                        </a>
+                                        <a class="dropdown-item" href="{{ path('quiz_admin_liste') }}">
+                                            <i class="fas fa-question-circle me-2"></i>Quiz
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-cogs me-2"></i>Paramètres
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        </ul>
+
+                        
+                        <ul class="navbar-nav">
+                            <li class="nav-item me-3">
+                                <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                                    <i class="fas fa-bell"></i>
+                                    <!-- Suppression de la référence à nonReadNotificationsCount -->
+                                    <span class="notification-dot"></span>
+                                </a>
+                            </li>
+<!-- Élément du menu déroulant correct -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+        {% if app.user.photo %}
+            <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" 
+                 alt="Photo de profil" 
+                 class="nav-profile-img">
+        {% else %}
+            <div class="nav-profile-img d-flex align-items-center justify-content-center bg-secondary">
+                <i class="fas fa-user text-white"></i>
+            </div>
+        {% endif %}
+    </a>
+    <div class="dropdown-menu dropdown-menu-end user-dropdown">
+        <div class="user-header">
+            {% if app.user.photo %}
+                <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" 
+                     alt="Photo de profil">
+            {% else %}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                     style="width: 80px; height: 80px; margin: 0 auto 10px;">
+                    <i class="fas fa-user fa-2x text-white"></i>
+                </div>
+            {% endif %}
+            <h6 class="mb-0">{{ app.user.prenom }} {{ app.user.nom }}</h6>
+            <small>{{ app.user.email }}</small>
+            <div class="mt-2">
+                {% for role in app.user.roles %}
+                    {% if role != 'ROLE_USER' %}
+                        <span class="badge-role">
+                            {{ role|replace({'ROLE_': ''}) }}
+                        </span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="user-stats">
+            <div class="row text-center">
+                <div class="col">
+                    <h6>{{ app.user.inscriptions|length }}</h6>
+                    <small>Formations</small>
+                </div>
+                <div class="col border-start">
+                    <h6>{% if app.user.badges is defined %}{{ app.user.badges|length }}{% else %}0{% endif %}</h6>
+                    <small>Badges</small>
+                </div>
+                <div class="col border-start">
+                    <h6>{% if app.user.niveau is defined %}{{ app.user.niveau }}{% else %}1{% endif %}</h6>
+                    <small>Niveau</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-group list-group-flush">
+            <a href="{{ path('profil_index') }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-user me-2"></i> Consulter mon profil
+            </a>
+            <a href="{{ path('profil_badges') }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-award me-2"></i> Mes badges 
+                {% if app.user.badges is defined and app.user.badges|length > 0 %}
+                    <span class="badge bg-primary float-end">{{ app.user.badges|length }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ path('profil_planning') }}" class="list-group-item list-group-item-action">
+                <i class="fas fa-calendar-alt me-2"></i> Mon planning
+            </a>
+        </div>
+
+        <div class="user-info border-top">
+            <div class="mb-2">
+                <i class="fas fa-phone-alt me-2"></i>
+                {{ app.user.telephone ?? 'Non renseigné' }}
+            </div>
+            {% if is_granted('ROLE_FORMATEUR') and app.user.biographie %}
+                <div class="mb-2">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {{ app.user.biographie|slice(0, 50) }}...
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="user-footer">
+            <div class="d-grid gap-2">
+                <a href="{{ path('admin_utilisateur_profile') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-user-edit me-2"></i>Modifier le profil
+                </a>
+                <a href="{{ path('app_logout') }}" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                </a>
+            </div>
+        </div>
+    </div>
+</li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Modal Notifications -->
+            <div class="modal fade" id="notificationsModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            {% if app.user %}
+                                {% set notifications = app.user.notifications|slice(0, 5) %}
+                                <div class="list-group">
+                                    {% if notifications|length > 0 %}
+                                        {% for notification in notifications %}
+                                            <a href="#" class="list-group-item list-group-item-action {{ notification.lu ? '' : 'bg-light' }}">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h6 class="mb-1">{{ notification.titre }}</h6>
+                                                    <small class="text-muted">{{ notification.dateCreation|date("d/m/Y H:i") }}</small>
+                                                </div>
+                                                <p class="mb-1">{{ notification.contenu|slice(0, 100) }}{% if notification.contenu|length > 100 %}...{% endif %}</p>
+                                                <small class="notification-time">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    {% if notification.type is defined %}
+                                                        {{ notification.type }}
+                                                    {% else %}
+                                                        Information
+                                                    {% endif %}
+                                                </small>
+                                            </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="list-group-item text-center py-4">
+                                            <i class="fas fa-bell-slash fa-2x mb-3 text-muted"></i>
+                                            <p>Vous n'avez pas de notifications</p>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <a href="{{ path('notification_liste') }}" class="list-group-item text-center">
+                                        <i class="fas fa-list me-1"></i>
+                                        Voir toutes les notifications
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="main-content">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show animate__animated animate__fadeIn m-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </div>
+
+        {% if app.user %}
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5>ABCCI Formation</h5>
+                        <p class="text-muted mt-3">
+                            Centre de formation professionnelle proposant des formations adaptées à vos besoins.
+                        </p>
+                        <div class="mt-3">
+                            <a href="#" class="me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                            <a href="#" class="me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                            <a href="#" class="me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5>Liens utiles</h5>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><a href="{{ path('formation_lister') }}">Formations</a></li>
+                            <li class="mb-2"><a href="#">Ressources</a></li>
+                            <li class="mb-2"><a href="#">FAQ</a></li>
+                            <li class="mb-2"><a href="#">Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Contact</h5>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 20 Rue Jules Verne, 14000 Caen</li>
+                            <li class="mb-2"><i class="fas fa-phone me-2"></i> 02.31.93.53.00</li>
+                            <li class="mb-2"><i class="fas fa-mobile-alt me-2"></i> 06.08.88.61.67</li>
+                            <li class="mb-2"><i class="fas fa-envelope me-2"></i> anne@abcci.fr</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="mt-4 mb-3" style="border-color: rgba(255, 255, 255, 0.1);">
+                <div class="text-center">
+                    <p class="mb-0 text-muted">&copy; {{ "now"|date("Y") }} ABCCI. Tous droits réservés.</p>
+                </div>
+            </div>
+        </footer>
+        {% endif %}
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Tooltips initialization
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+                
+                // Active link highlighting
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && currentPath.includes(href) && href !== '#') {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        </script>
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

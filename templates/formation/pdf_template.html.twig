@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Formation - {{ formation.titre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        .formation-info {
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ formation.titre }}</h1>
+        <p>Formation professionnelle</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Description</div>
+        <p>{{ formation.description }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Informations générales</div>
+        <table>
+            <tr>
+                <th>Thème</th>
+                <td>{{ formation.theme }}</td>
+                <th>Niveau</th>
+                <td>{{ formation.niveau }}</td>
+            </tr>
+            <tr>
+                <th>Durée</th>
+                <td>{{ formation.duree }}h</td>
+                <th>Prix</th>
+                <td>{{ formation.prix }}€</td>
+            </tr>
+            <tr>
+                <th>Date de début</th>
+                <td>{{ formation.dateDebut|date('d/m/Y') }}</td>
+                <th>Date de fin</th>
+                <td>{{ formation.dateFin|date('d/m/Y') }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Formateur</div>
+        <p>
+            <strong>{{ formation.formateur.prenom }} {{ formation.formateur.nom }}</strong><br>
+            {{ formation.formateur.biographie }}
+        </p>
+    </div>
+
+    {% if formation.documents|length > 0 %}
+    <div class="section">
+        <div class="section-title">Documents pédagogiques</div>
+        <ul>
+            {% for document in formation.documents %}
+                <li>{{ document.nom }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Document généré le {{ "now"|date('d/m/Y H:i') }}</p>
+        <p>ABCCI Formation - Tous droits réservés</p>
+    </div>
+</body>
+</html>

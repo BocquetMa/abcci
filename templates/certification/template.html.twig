@@ -1,0 +1,47 @@
+{# templates/certification/template.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Certification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px;
+        }
+        .certificate {
+            border: 2px solid #333;
+            padding: 20px;
+            margin: 20px;
+        }
+        .title {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .content {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .signature {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <h1 class="title">Certificat de réussite</h1>
+        <div class="content">
+            <p>Ce certificat atteste que</p>
+            <h2>{{ utilisateur.prenom }} {{ utilisateur.nom }}</h2>
+            <p>a suivi avec succès la formation</p>
+            <h3>{{ formation.titre }}</h3>
+            <p>le {{ date|date('d/m/Y') }}</p>
+        </div>
+        <div class="signature">
+            <p>Le formateur</p>
+            <p>{{ formation.formateur.prenom }} {{ formation.formateur.nom }}</p>
+        </div>
+    </div>
+</body>
+</html>

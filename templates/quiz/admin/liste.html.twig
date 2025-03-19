@@ -1,0 +1,377 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration des Quiz{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .admin-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        
+        .page-header {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-header h1 {
+            color: var(--dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .page-header:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        .btn-add {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 50px;
+            padding: 0.6rem 1.25rem;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.15);
+            transition: all 0.3s;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(13, 110, 253, 0.2);
+            color: white;
+        }
+        
+        .btn-add i {
+            margin-right: 0.5rem;
+        }
+        
+        .quiz-table {
+            width: 100%;
+            margin-top: 1.5rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .quiz-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .quiz-table td {
+            padding: 1rem;
+            border-top: 1px solid #f1f3f5;
+            vertical-align: middle;
+        }
+        
+        .quiz-table tbody tr {
+            background-color: white;
+            transition: all 0.2s;
+        }
+        
+        .quiz-table tbody tr:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .quiz-title {
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .quiz-title small {
+            font-weight: normal;
+            color: var(--secondary);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        .quiz-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35rem 0.6rem;
+            border-radius: 50px;
+            white-space: nowrap;
+        }
+        
+        .badge-outline-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .badge-outline-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+        
+        .badge-outline-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        
+        .badge-outline-info {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+            border: 1px solid rgba(13, 202, 240, 0.2);
+        }
+        
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .btn-action:last-child {
+            margin-right: 0;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        
+        .btn-view:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .btn-edit:hover {
+            background-color: #ffc107;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-question {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+        
+        .btn-question:hover {
+            background-color: #0dcaf0;
+            color: white;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
+        
+        .status-inactive {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+        }
+        
+        .quiz-stat {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .quiz-stat i {
+            width: 20px;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container admin-container">
+    <div class="page-header">
+        <h1>Gestion des Quiz</h1>
+        
+        {% if is_granted('ROLE_FORMATEUR') and app.user.getFormations()|length > 0 %}
+            <div class="dropdown">
+                <button class="btn-add dropdown-toggle" type="button" id="addQuizDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-plus-circle"></i> Nouveau quiz
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="addQuizDropdown">
+                    {% for formation in app.user.getFormations() %}
+                        <li><a class="dropdown-item" href="{{ path('quiz_admin_nouveau', {id: formation.id}) }}">{{ formation.titre }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if quizzes|length > 0 %}
+        <div class="table-responsive">
+            <table class="quiz-table">
+                <thead>
+                    <tr>
+                        <th>Quiz</th>
+                        <th>Formation</th>
+                        <th>Statistiques</th>
+                        <th>Statut</th>
+                        <th>Dernière modification</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quiz in quizzes %}
+                        <tr>
+                            <td>
+                                <div class="quiz-title">
+                                    {{ quiz.titre }}
+                                    <small>{{ quiz.questions|length }} question(s)</small>
+                                </div>
+                            </td>
+                            <td>{{ quiz.formation.titre }}</td>
+                            <td>
+                                <div class="quiz-stat">
+                                    <i class="fas fa-users"></i> {{ quiz.tentatives|length }} tentative(s)
+                                </div>
+                                <div class="quiz-stat">
+                                    <i class="fas fa-stopwatch"></i> {{ quiz.tempsLimite }} min
+                                </div>
+                                <div class="quiz-stat">
+                                    <i class="fas fa-trophy"></i> Min. {{ quiz.scoreReussite }}%
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="status-indicator {{ quiz.actif ? 'status-active' : 'status-inactive' }}"></span>
+                                    {{ quiz.actif ? 'Actif' : 'Inactif' }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if quiz.dateModification %}
+                                    {{ quiz.dateModification|date('d/m/Y H:i') }}
+                                {% else %}
+                                    {{ quiz.dateCreation|date('d/m/Y H:i') }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex">
+                                    <a href="{{ path('quiz_details', {id: quiz.id}) }}" class="btn-action btn-view" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('quiz_admin_editer', {id: quiz.id}) }}" class="btn-action btn-edit" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ path('question_liste', {id: quiz.id}) }}" class="btn-action btn-question" title="Questions">
+                                        <i class="fas fa-question"></i>
+                                    </a>
+                                    <a href="{{ path('quiz_admin_resultats', {id: quiz.id}) }}" class="btn-action btn-view" title="Résultats">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </a>
+                                    <a href="{{ path('quiz_admin_supprimer', {id: quiz.id}) }}" class="btn-action btn-delete" title="Supprimer">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>Aucun quiz disponible</h3>
+            <p>Vous n'avez pas encore créé de quiz. Cliquez sur le bouton "Nouveau quiz" pour commencer.</p>
+            
+            {% if is_granted('ROLE_FORMATEUR') and app.user.getFormations()|length == 0 %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Vous devez d'abord être assigné à une formation avant de pouvoir créer des quiz.
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

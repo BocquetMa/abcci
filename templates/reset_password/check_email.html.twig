@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Email de réinitialisation envoyé{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .reset-container {
+            max-width: 450px;
+            margin: 2rem auto;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #4a69bb, #6E8BD6);
+            border-bottom: none;
+        }
+        .email-icon {
+            font-size: 3rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        .expiration-text {
+            font-style: italic;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="reset-container">
+    <div class="card">
+        <div class="card-header text-white text-center">
+            <h1 class="h3 mb-0">Email de réinitialisation envoyé</h1>
+        </div>
+        <div class="card-body p-4 text-center">
+            {# Afficher les messages de succès ou d'erreur en mode développement #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+
+            {# Afficher le token de réinitialisation en mode développement #}
+            {% if app.flashes('reset_password_token') is defined and app.flashes('reset_password_token')|length > 0 %}
+                <div class="alert alert-info mt-3">
+                    <p><strong>Mode développement uniquement :</strong> Utilisez ce lien pour réinitialiser votre mot de passe :</p>
+                    {% for token in app.flashes('reset_password_token') %}
+                        <a href="{{ path('app_reset_password', {'token': token}) }}">{{ path('app_reset_password', {'token': token}) }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="email-icon">
+                <i class="fas fa-envelope-open-text"></i>
+            </div>
+            
+            <p class="mb-3">
+                Si un compte correspond à votre adresse e-mail, un email contenant un lien de réinitialisation de mot de passe vient d'être envoyé.
+            </p>
+            
+            <p class="expiration-text mb-4">
+                Ce lien expirera dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+            </p>
+            
+            <div class="alert alert-light border">
+                <i class="fas fa-info-circle me-2"></i>
+                Si vous ne recevez pas d'email, veuillez vérifier votre dossier de spam ou 
+                <a href="{{ path('app_forgot_password_request') }}" class="alert-link">essayer à nouveau</a>.
+            </div>
+        </div>
+        <div class="card-footer text-center py-3">
+            <a href="{{ path('app_login') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-1"></i>Retour à la connexion
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

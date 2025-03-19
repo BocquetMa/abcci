@@ -1,0 +1,88 @@
+{# templates/profil/badge_details.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du badge - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-3">
+            {% include 'profil/_sidebar.html.twig' with {active: 'badges'} %}
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Détails du badge</h2>
+                    <a href="{{ path('profil_badges') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Retour aux badges
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="mb-4">
+                                <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-3" style="max-height: 180px;">
+                                <div class="d-flex justify-content-center">
+                                    <span class="badge bg-primary me-2">{{ badge.points }} points</span>
+                                    {% if badge.type == constant('App\\Entity\\Badge::TYPE_QUIZ') %}
+                                        <span class="badge bg-info">Quiz</span>
+                                    {% elseif badge.type == constant('App\\Entity\\Badge::TYPE_FORMATION') %}
+                                        <span class="badge bg-success">Formation</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Réalisation</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <p class="text-muted">
+                                <i class="far fa-calendar-alt me-2"></i> 
+                                Obtenu le {{ badge.obtenuLe|date('d/m/Y à H:i') }}
+                            </p>
+                            
+                            {% if badge.attributeurBadge is defined and badge.attributeurBadge %}
+                                <p class="text-muted">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Attribué par: {{ badge.attributeurBadge.prenom }} {{ badge.attributeurBadge.nom }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h3>{{ badge.nom }}</h3>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Description</h5>
+                                    <p class="card-text">{{ badge.description }}</p>
+                                </div>
+                            </div>
+                            
+                            {% if badge.type == constant('App\\Entity\\Badge::TYPE_QUIZ') %}
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Critères d'obtention</h5>
+                                        <p class="card-text">Ce badge est obtenu lorsque vous réussissez un quiz avec un score suffisant.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if badge.type == constant('App\\Entity\\Badge::TYPE_FORMATION') and badge.formation is defined and badge.formation %}
+                                <div class="alert alert-info">
+                                    <p class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Ce badge a été obtenu dans le cadre de la formation 
+                                        <strong>{{ badge.formation.titre }}</strong>.
+                                    </p>
+                                </div>
+                                
+                                <a href="{{ path('formation_voir', {'id': badge.formation.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-graduation-cap me-2"></i> Voir la formation
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

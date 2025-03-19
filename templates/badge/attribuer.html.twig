@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Attribuer un Badge{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Attribuer un Badge Personnalisé</h1>
+
+    {{ form_start(form, {'attr': {'class': 'badge-form'}}) }}
+    
+    <div class="card">
+        <div class="card-header">
+            Détails du Badge
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form_row(form.utilisateur, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.nom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    {{ form_row(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    {{ form_row(form.points, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.image, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Attribuer le Badge</button>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}

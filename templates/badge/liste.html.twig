@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Badges{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Mes Badges</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Résumé
+        </div>
+        <div class="card-body">
+            <p>Total de points : {{ total_points }}</p>
+            <p>Niveau actuel : {{ niveau_actuel }}</p>
+        </div>
+    </div>
+
+    {% for type, badges in badges_groupes %}
+        {% if badges|length > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    {% if type == 'quiz' %}
+                        Badges de Quiz
+                    {% elseif type == 'formation' %}
+                        Badges de Formation
+                    {% elseif type == 'achievement' %}
+                        Badges Personnels
+                    {% else %}
+                        Autres Badges
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for badge in badges %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <img src="{{ asset('uploads/badges/' ~ badge.image) }}" class="card-img-top" alt="{{ badge.nom }}">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ badge.nom }}</h5>
+                                        <p class="card-text">{{ badge.description }}</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                {{ badge.points }} points 
+                                                - Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

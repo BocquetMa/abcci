@@ -1,0 +1,65 @@
+{# templates/profil/_sidebar.html.twig #}
+<div class="list-group mb-4">
+    <a href="{{ path('profil_index') }}" class="list-group-item list-group-item-action {% if active is defined and active == 'index' %}active{% endif %}">
+        <i class="fas fa-user me-2"></i> Mon profil
+    </a>
+    <a href="{{ path('profil_badges') }}" class="list-group-item list-group-item-action {% if active is defined and active == 'badges' %}active{% endif %}">
+        <i class="fas fa-award me-2"></i> Mes badges
+        {% if app.user.badges is defined and app.user.badges|length > 0 %}
+            <span class="badge bg-primary float-end">{{ app.user.badges|length }}</span>
+        {% endif %}
+    </a>
+    <a href="{{ path('profil_planning') }}" class="list-group-item list-group-item-action {% if active is defined and active == 'planning' %}active{% endif %}">
+        <i class="fas fa-calendar-alt me-2"></i> Mon planning
+    </a>
+    <a href="{{ path('formation_lister') }}" class="list-group-item list-group-item-action {% if active is defined and active == 'formations' %}active{% endif %}">
+        <i class="fas fa-graduation-cap me-2"></i> Formations disponibles
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Mon niveau</h5>
+    </div>
+    <div class="card-body">
+        <div class="text-center mb-3">
+            <span class="display-4">{% if app.user.niveau is defined %}{{ app.user.niveau }}{% else %}1{% endif %}</span>
+            <p class="text-muted">Niveau actuel</p>
+        </div>
+        <div class="progress mb-2">
+            {% set progression = 25 %}
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ progression }}%;" aria-valuenow="{{ progression }}" aria-valuemin="0" aria-valuemax="100">{{ progression }}%</div>
+        </div>
+        <p class="small text-center text-muted">
+            {% if app.user.points is defined %}
+                {{ app.user.points }} points
+            {% else %}
+                0 points
+            {% endif %}
+            (encore quelques points pour passer au niveau suivant)
+        </p>
+    </div>
+</div>
+
+{% if app.user.badges is defined and app.user.badges|length > 0 %}
+    {% set badges_recents = app.user.badges|sort((a, b) => b.obtenuLe <=> a.obtenuLe)|slice(0, 3) %}
+    
+    {% if badges_recents|length > 0 %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Badges récents</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for badge in badges_recents %}
+                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="me-2" style="width: 30px; height: 30px;">
+                        <div>
+                            <h6 class="mb-0">{{ badge.nom }}</h6>
+                            <small class="text-muted">{{ badge.obtenuLe|date('d/m/Y') }}</small>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

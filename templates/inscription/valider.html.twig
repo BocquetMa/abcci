@@ -1,0 +1,171 @@
+{# templates/inscription/valider.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Validation d'inscription{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .form-check-input:checked ~ .form-check-label {
+        font-weight: bold;
+    }
+    #validation_inscription_action_accepter:checked ~ .action-accepter {
+        display: block;
+    }
+    #validation_inscription_action_refuser:checked ~ .action-refuser {
+        display: block;
+    }
+    .action-container {
+        display: none;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 8px;
+    }
+    .action-accepter {
+        background-color: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+    .action-refuser {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fonction pour basculer l'affichage des sections
+        function toggleSections() {
+            const accepter = document.getElementById('validation_inscription_action_accepter').checked;
+            document.querySelector('.action-accepter').style.display = accepter ? 'block' : 'none';
+            document.querySelector('.action-refuser').style.display = !accepter ? 'block' : 'none';
+        }
+        
+        // Ajouter des écouteurs d'événements aux boutons radio
+        document.querySelectorAll('input[name="validation_inscription[action]"]').forEach(radio => {
+            radio.addEventListener('change', toggleSections);
+        });
+        
+        // Appel initial pour configurer l'affichage
+        toggleSections();
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Validation d'inscription</h2>
+                    <a href="{% if is_granted('ROLE_ADMIN') %}{{ path('inscription_admin_en_attente') }}{% else %}{{ path('inscription_formateur_en_attente') }}{% endif %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Retour
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>Informations sur l'inscription</h4>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Formation</dt>
+                                    <dd class="col-sm-8">{{ inscription.formation.titre }}</dd>
+                                    
+                                    <dt class="col-sm-4">Participant</dt>
+                                    <dd class="col-sm-8">{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</dd>
+                                    
+                                    <dt class="col-sm-4">Date de demande</dt>
+                                    <dd class="col-sm-8">{{ inscription.dateInscription|date('d/m/Y H:i') }}</dd>
+                                    
+                                    {% if inscription.motif %}
+                                        <dt class="col-sm-4">Motivation</dt>
+                                        <dd class="col-sm-8">{{ inscription.motif }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Détails de la formation</h4>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Formateur</dt>
+                                    <dd class="col-sm-8">{{ inscription.formation.formateur.prenom }} {{ inscription.formation.formateur.nom }}</dd>
+                                    
+                                    <dt class="col-sm-4">Places</dt>
+                                    <dd class="col-sm-8">{{ inscription.formation.placesDisponibles }} disponibles sur {{ inscription.formation.nombrePlaces }}</dd>
+                                    
+                                    <dt class="col-sm-4">Statut</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-warning">En attente</span>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    {{ form_start(form) }}
+                       <div class="mb-4">
+                            <h5>Action à effectuer</h5>
+                            {% set actionField = form.action %}
+                            
+                            {# Sauvegardez le rendu du champ pour le cacher mais l'inclure dans le formulaire #}
+                            <div style="display: none;">{{ form_widget(actionField) }}</div>
+                            
+                            <div class="form-check form-check-inline">
+                                <input type="radio" id="action_accepter" name="{{ actionField.vars.full_name }}" 
+                                    value="accepter" class="form-check-input" 
+                                    {% if actionField.vars.data == 'accepter' %}checked{% endif %}
+                                    onchange="toggleSections()">
+                                <label for="action_accepter" class="form-check-label">Accepter l'inscription</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" id="action_refuser" name="{{ actionField.vars.full_name }}" 
+                                    value="refuser" class="form-check-input"
+                                    {% if actionField.vars.data == 'refuser' %}checked{% endif %}
+                                    onchange="toggleSections()">
+                                <label for="action_refuser" class="form-check-label">Refuser l'inscription</label>
+                            </div>
+                            
+                            <div class="action-container action-accepter">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form_row(form.dateDebut) }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(form.dateFin) }}
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3">
+                                    <p class="mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        L'inscription sera validée et l'utilisateur sera notifié des dates de formation.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="action-container action-refuser">
+                                {{ form_row(form.motif) }}
+                                <div class="alert alert-danger mt-3">
+                                    <p class="mb-0">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        L'inscription sera refusée et l'utilisateur sera notifié avec le motif indiqué.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Valider ma décision
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Badge{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{ badge.nom }}</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="{{ asset('uploads/badges/' ~ badge.image) }}" class="img-fluid" alt="{{ badge.nom }}">
+                </div>
+                <div class="col-md-8">
+                    <h3>Description</h3>
+                    <p>{{ badge.description }}</p>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <strong>Type :</strong> 
+                            {% switch badge.type %}
+                                {% case 'quiz' %}
+                                    Badge de Quiz
+                                {% case 'formation' %}
+                                    Badge de Formation
+                                {% case 'achievement' %}
+                                    Badge Personnel
+                            {% endswitch %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Points :</strong> {{ badge.points }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <strong>Date d'obtention :</strong> 
+                            {{ badge.obtenuLe|date('d/m/Y H:i') }}
+                        </div>
+                    </div>
+
+                    {% if badge.attributeurBadge %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <strong>Attribué par :</strong> 
+                            {{ badge.attributeurBadge.prenom }} {{ badge.attributeurBadge.nom }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('badge_liste') }}" class="btn btn-secondary">Retour à la liste des badges</a>
+    </div>
+</div>
+{% endblock %}

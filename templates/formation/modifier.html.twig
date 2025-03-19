@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ formation is defined ? 'Modifier' : 'Ajouter' }} une formation{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    {# Messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="mb-0 h2">{{ formation is defined ? 'Modifier' : 'Ajouter' }} une formation</h1>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form_row(form.titre) }}
+                        {{ form_row(form.description) }}
+                        {{ form_row(form.theme) }}
+                        {{ form_row(form.niveau) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(form.duree) }}
+                        {{ form_row(form.prix) }}
+                        {{ form_row(form.dateDebut) }}
+                        {{ form_row(form.dateFin) }}
+                        {{ form_row(form.nombrePlacesTotal) }}
+                    </div>
+                </div>
+
+                {% if formation is defined and formation.documents|length > 0 %}
+                    <div class="mt-4">
+                        <h4>Documents existants</h4>
+                        <div class="list-group">
+                            {% for document in formation.documents %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-file-{{ document.extension|default('alt') }} me-2"></i>
+                                        {{ document.nom }}
+                                    </div>
+                                    <a href="{{ path('formation_document_supprimer', {'id': document.id}) }}" 
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    {{ form_row(form.documents) }}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('formation_lister') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> {{ formation is defined ? 'Modifier' : 'Ajouter' }}
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Pour la validation côté client
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // Pour la gestion des uploads de fichiers multiples
+        document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+            var files = e.target.files;
+            var fileNames = Array.from(files).map(file => file.name).join(', ');
+            var label = this.nextElementSibling;
+            label.textContent = fileNames || 'Choisir les fichiers';
+        });
+    </script>
+{% endblock %}

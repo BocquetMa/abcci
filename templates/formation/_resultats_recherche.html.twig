@@ -1,0 +1,25 @@
+{# templates/formation/_resultats_recherche.html.twig #}
+{% if formations|length > 0 %}
+    <div class="list-group">
+        {% for formation in formations %}
+            <a href="{{ path('formation_voir', {'id': formation.id}) }}" 
+               class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ formation.titre }}</h5>
+                    <small>{{ formation.duree }}h - {{ formation.prix }}€</small>
+                </div>
+                <p class="mb-1">{{ formation.description|u.truncate(100, '...') }}</p>
+                <small class="text-muted">
+                    {{ formation.theme }} - {{ formation.niveau }}
+                    <span class="badge bg-{{ formation.placesDisponibles > 0 ? 'success' : 'danger' }} float-end">
+                        {{ formation.placesDisponibles }} places disponibles
+                    </span>
+                </small>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Aucun résultat trouvé pour votre recherche.
+    </div>
+{% endif %}

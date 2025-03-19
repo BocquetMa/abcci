@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .login-container {
+            max-width: 450px;
+            margin: 2rem auto;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #4a69bb, #6E8BD6);
+            border-bottom: none;
+        }
+        .or-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+        .or-divider:before, .or-divider:after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .or-divider-text {
+            padding: 0 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .social-btn:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .social-btn img {
+            height: 24px;
+            margin-right: 0.75rem;
+        }
+        .google-btn {
+            color: #444;
+        }
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="card">
+        <div class="card-header text-white text-center">
+            <h1 class="h3 mb-0">Connexion</h1>
+        </div>
+        <div class="card-body p-4">
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+            
+            <!-- Bouton de connexion Google -->
+            <a href="{{ path('connect_google_start') }}" class="btn social-btn google-btn w-100">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+                Continuer avec Google
+            </a>
+            
+            <div class="or-divider">
+                <span class="or-divider-text">OU</span>
+            </div>
+            
+            <form method="post">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adresse email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" value="{{ last_username }}" name="email" id="email"
+                               class="form-control" required autofocus placeholder="votre@email.com">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="password" class="form-label">Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" id="password"
+                               class="form-control" required placeholder="••••••••">
+                    </div>
+                </div>
+                
+                <div class="form-footer">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me" name="_remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                    <a href="{{ path('app_forgot_password_request') }}" class="text-decoration-none">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+                
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                
+                <button class="btn btn-primary w-100 mt-4" type="submit">
+                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                </button>
+            </form>
+        </div>
+        <div class="card-footer text-center py-3">
+            <p class="mb-0">Vous n'avez pas de compte ? 
+                <a href="{{ path('app_register') }}" class="text-decoration-none fw-bold">
+                    Créer un compte
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
