@@ -88,8 +88,8 @@ Pour éviter les lenteurs sur de gros volumes de données :
 
 
 # Cloner le dépôt
-git clone https://github.com/votre-utilisateur/abcci-webapp.git
-cd abcci-webapp
+git clone https://github.com/BocquetMa/abcci.git
+cd abcci
 
 # Installer les dépendances Symfony
 composer install
