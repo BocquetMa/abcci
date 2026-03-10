@@ -1,119 +1,28 @@
 {# templates/admin/utilisateur/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Gestion des Utilisateurs{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .user-management {
-            padding: 2rem 0;
-        }
-        .user-management__header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        .user-management__title {
-            color: #333;
-            font-weight: 600;
-            margin: 0;
-        }
-        .user-table {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .user-table thead {
-            background-color: #f8f9fa;
-        }
-        .user-table th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            padding: 1rem;
-            border-bottom: 2px solid #dee2e6;
-        }
-        .user-table td {
-            padding: 1rem;
-            vertical-align: middle;
-        }
-        .user-table tbody tr:hover {
-            background-color: rgba(0, 123, 255, 0.05);
-        }
-        .user-table tbody tr:not(:last-child) {
-            border-bottom: 1px solid #e9ecef;
-        }
-        .badge-role {
-            display: inline-block;
-            padding: 0.35rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            background-color: #e9ecef;
-            color: #495057;
-        }
-        .badge-role.admin {
-            background-color: #dc3545;
-            color: white;
-        }
-        .badge-role.user {
-            background-color: #17a2b8;
-            color: white;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .btn-add {
-            background-color: #28a745;
-            border-color: #28a745;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .btn-edit {
-            background-color: #007bff;
-            border-color: #007bff;
-            padding: 0.375rem 0.75rem;
-        }
-        .btn-delete {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            padding: 0.375rem 0.75rem;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-    </style>
-{% endblock %}
+{% block title %}Gestion des utilisateurs - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container user-management">
-    <div class="user-management__header">
-        <h1 class="user-management__title">Gestion des Utilisateurs</h1>
-        <a href="{{ path('admin_utilisateur_ajouter') }}" class="btn btn-success btn-add">
-            <i class="fas fa-plus-circle"></i> Ajouter un utilisateur
+<div class="fr-container fr-mt-4w fr-mb-6w">
+    <div class="d-flex justify-content-between align-items-center fr-mb-3w flex-wrap gap-2">
+        <h1 class="fr-h2 mb-0">Gestion des utilisateurs</h1>
+        <a href="{{ path('admin_utilisateur_ajouter') }}" class="fr-btn fr-icon-user-add-line fr-btn--icon-left">
+            Ajouter un utilisateur
         </a>
     </div>
-    
+
     {% if utilisateurs|length > 0 %}
-        <div class="table-responsive">
-            <table class="table user-table">
+        <div class="fr-table fr-table--bordered fr-table--no-caption">
+            <table>
                 <thead>
                     <tr>
-                        <th width="5%">ID</th>
-                        <th width="20%">Nom</th>
-                        <th width="20%">Prénom</th>
-                        <th width="25%">Email</th>
-                        <th width="15%">Rôle</th>
-                        <th width="15%">Actions</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Prénom</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Rôle(s)</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -126,23 +35,27 @@
                                 <a href="mailto:{{ utilisateur.email }}">{{ utilisateur.email }}</a>
                             </td>
                             <td>
-                                {% for role in utilisateur.roles %}
-                                    <span class="badge-role {% if role == 'ROLE_ADMIN' %}admin{% elseif role == 'ROLE_USER' %}user{% endif %}">
-                                        {{ role|replace({'ROLE_': ''}) }}
-                                    </span>
-                                {% endfor %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for role in utilisateur.roles %}
+                                        {% set roleLabel = role|replace({'ROLE_': ''}) %}
+                                        <span class="fr-badge fr-badge--sm
+                                            {% if role == 'ROLE_ADMIN' %}fr-badge--error
+                                            {% elseif role == 'ROLE_FORMATEUR' %}fr-badge--purple-glycine
+                                            {% else %}fr-badge--blue-cumulus{% endif %}">
+                                            {{ roleLabel }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
                             </td>
                             <td>
-                                <div class="action-buttons">
-                                    <a href="{{ path('admin_utilisateur_modifier', {id: utilisateur.id}) }}" class="btn btn-primary btn-edit" title="Modifier">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{{ path('admin_utilisateur_supprimer', {id: utilisateur.id}) }}" 
-                                       class="btn btn-danger btn-delete" 
-                                       title="Supprimer"
-                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ path('admin_utilisateur_modifier', {id: utilisateur.id}) }}"
+                                       class="fr-btn fr-btn--sm fr-btn--secondary fr-icon-edit-line"
+                                       title="Modifier {{ utilisateur.prenom }} {{ utilisateur.nom }}"></a>
+                                    <a href="{{ path('admin_utilisateur_supprimer', {id: utilisateur.id}) }}"
+                                       class="fr-btn fr-btn--sm fr-btn--tertiary fr-icon-delete-line"
+                                       title="Supprimer {{ utilisateur.prenom }} {{ utilisateur.nom }}"
+                                       onclick="return confirm('Supprimer l\'utilisateur {{ utilisateur.prenom }} {{ utilisateur.nom }} ?')"></a>
                                 </div>
                             </td>
                         </tr>
@@ -151,9 +64,9 @@
             </table>
         </div>
     {% else %}
-        <div class="empty-state">
-            <h3>Aucun utilisateur trouvé</h3>
-            <p>Commencez par ajouter un nouvel utilisateur en cliquant sur le bouton ci-dessus.</p>
+        <div class="fr-alert fr-alert--info" role="alert">
+            <p class="fr-alert__title">Aucun utilisateur</p>
+            <p>Commencez par ajouter un premier utilisateur.</p>
         </div>
     {% endif %}
 </div>

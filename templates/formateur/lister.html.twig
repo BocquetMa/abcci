@@ -359,9 +359,11 @@
 <div class="container formateurs-container">
     <div class="page-header">
         <h1>Liste des Formateurs</h1>
+        {% if is_granted('ROLE_ADMIN') %}
         <a href="{{ path('formateur_ajouter') }}" class="add-btn">
             <i class="fas fa-plus-circle"></i> Ajouter un Formateur
         </a>
+        {% endif %}
     </div>
     
     <div class="search-container">
@@ -415,13 +417,15 @@
                         <a href="{{ path('formateur_voir', {id: formateur.id}) }}" class="action-btn btn-view">
                             <i class="fas fa-eye"></i> Voir
                         </a>
+                        {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('formateur_modifier', {id: formateur.id}) }}" class="action-btn btn-edit">
                             <i class="fas fa-edit"></i> Modifier
                         </a>
-                        <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="action-btn btn-delete" 
+                        <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="action-btn btn-delete"
                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?')">
                             <i class="fas fa-trash-alt"></i> Supprimer
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -469,13 +473,15 @@
                             <a href="{{ path('formateur_voir', {id: formateur.id}) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Voir">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            {% if is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('formateur_modifier', {id: formateur.id}) }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Modifier">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="btn btn-sm btn-danger" 
+                            <a href="{{ path('formateur_supprimer', {id: formateur.id}) }}" class="btn btn-sm btn-danger"
                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce formateur ?')" data-bs-toggle="tooltip" title="Supprimer">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

@@ -11,10 +11,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/formateur', name: 'formateur_')]
 class FormateurController extends AbstractController
 {
+    #[Route('/mes-formations', name: 'mes_formations')]
+    #[IsGranted('ROLE_FORMATEUR')]
+    public function mesFormations(): Response
+    {
+        /** @var Formateur $formateur */
+        $formateur = $this->getUser();
+        return $this->render('formateur/mes_formations.html.twig', [
+            'formations' => $formateur->getFormationsAnimees(),
+        ]);
+    }
+
     #[Route('/lister', name: 'lister')]
     public function lister(FormateurRepository $formateurRepository): Response
     {
@@ -25,6 +37,7 @@ class FormateurController extends AbstractController
     }
 
     #[Route('/ajouter', name: 'ajouter')]
+    #[IsGranted('ROLE_ADMIN')]
     public function ajouter(
         Request $request, 
         EntityManagerInterface $entityManager,
@@ -59,6 +72,7 @@ class FormateurController extends AbstractController
     }
 
     #[Route('/modifier/{id}', name: 'modifier')]
+    #[IsGranted('ROLE_ADMIN')]
     public function modifier(
         Formateur $formateur, 
         Request $request, 
@@ -92,6 +106,7 @@ class FormateurController extends AbstractController
     }
 
     #[Route('/supprimer/{id}', name: 'supprimer')]
+    #[IsGranted('ROLE_ADMIN')]
     public function supprimer(Formateur $formateur, EntityManagerInterface $entityManager): Response
     {
         $entityManager->remove($formateur);

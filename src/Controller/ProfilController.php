@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Badge;
+use App\Form\ProfileType;
 use App\Repository\BadgeRepository;
 use App\Repository\InscriptionRepository;
 use App\Repository\FormationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -32,32 +35,34 @@ class ProfilController extends AbstractController
     }
 
     #[Route('/planning', name: 'planning')]
-    public function planning(InscriptionRepository $inscriptionRepository): Response
+    public function planning(): Response
     {
         $user = $this->getUser();
-    
-        // Récupérer les inscriptions validées de l'utilisateur
-        $inscriptions = $user->getInscriptions()->filter(function($inscription) {
-            return $inscription->isEstValide();
-        });
-    
-        // Organiser les formations par date
         $planning = [];
-        foreach ($inscriptions as $inscription) {
-            if ($inscription->getDateDebut()) {
-                $dateDebut = $inscription->getDateDebut()->format('Y-m-d');
-                if (!isset($planning[$dateDebut])) {
-                    $planning[$dateDebut] = [];
+
+        if ($this->isGranted('ROLE_FORMATEUR')) {
+            // Pour un formateur : afficher les formations qu'il anime
+            foreach ($user->getFormationsAnimees() as $formation) {
+                $date = $formation->getDateDebut()
+                    ? $formation->getDateDebut()->format('Y-m-d')
+                    : '0000-00-00';
+                $planning[$date][] = ['type' => 'formation', 'formation' => $formation];
+            }
+        } else {
+            // Pour un stagiaire : inscriptions validées
+            foreach ($user->getInscriptions() as $inscription) {
+                if ($inscription->isEstValide() && $inscription->getDateDebut()) {
+                    $date = $inscription->getDateDebut()->format('Y-m-d');
+                    $planning[$date][] = ['type' => 'inscription', 'inscription' => $inscription];
                 }
-                $planning[$dateDebut][] = $inscription;
             }
         }
-    
-        // Trier les dates
+
         ksort($planning);
-        
+
         return $this->render('profil/planning.html.twig', [
-            'planning' => $planning
+            'planning' => $planning,
+            'is_formateur' => $this->isGranted('ROLE_FORMATEUR'),
         ]);
     }
     
@@ -109,6 +114,53 @@ class ProfilController extends AbstractController
         ]);
     }
     
+    #[Route('/modifier', name: 'modifier')]
+    public function modifier(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        $form = $this->createForm(ProfileType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($photoFile = $form->get('photoFile')->getData()) {
+                $this->uploadPhoto($photoFile, $user);
+            }
+            if ($cvFile = $form->get('cvFile')->getData()) {
+                $this->uploadCv($cvFile, $user);
+            }
+            $entityManager->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès');
+            return $this->redirectToRoute('profil_modifier');
+        }
+
+        return $this->render('profil/modifier.html.twig', [
+            'form' => $form->createView(),
+            'user' => $user,
+        ]);
+    }
+
+    private function uploadPhoto(UploadedFile $file, $user): void
+    {
+        $filename = uniqid() . '.' . $file->guessExtension();
+        $file->move($this->getParameter('photos_directory'), $filename);
+        if ($old = $user->getPhoto()) {
+            $oldPath = $this->getParameter('photos_directory') . '/' . $old;
+            if (file_exists($oldPath)) unlink($oldPath);
+        }
+        $user->setPhoto($filename);
+    }
+
+    private function uploadCv(UploadedFile $file, $user): void
+    {
+        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '-' . uniqid() . '.' . $file->guessExtension();
+        $file->move($this->getParameter('cv_directory'), $filename);
+        if ($old = $user->getCvFilename()) {
+            $oldPath = $this->getParameter('cv_directory') . '/' . $old;
+            if (file_exists($oldPath)) unlink($oldPath);
+        }
+        $user->setCvFilename($filename);
+    }
+
     /**
      * Affiche les inscriptions de l'utilisateur
      */

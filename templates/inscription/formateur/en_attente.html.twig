@@ -1,76 +1,67 @@
-{# templates/inscription/formateur/en_attente.html.twig #}
 {% extends 'base.html.twig' %}
-
-{% block title %}Inscriptions en attente - {{ parent() }}{% endblock %}
+{% block title %}Inscriptions en attente - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    <div class="row">
+<div class="container" style="max-width:1200px; padding:2rem 1.5rem;">
+    <div class="row g-4">
         <div class="col-md-3">
             {% include 'formateur/_sidebar.html.twig' with {active: 'inscriptions_attente'} %}
         </div>
         <div class="col-md-9">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Inscriptions en attente</h2>
-                    <a href="{{ path('inscription_formateur_liste') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-list me-1"></i>Toutes les inscriptions
-                    </a>
-                </div>
-                <div class="card-body">
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm);">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:1rem; font-weight:700; color:var(--clr-text); margin:0;">
+                        <i class="fas fa-user-clock me-2" style="color:var(--clr-warning);"></i>Inscriptions en attente
+                    </h2>
                     {% if inscriptions|length > 0 %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Formation</th>
-                                        <th>Participant</th>
-                                        <th>Date de demande</th>
-                                        <th>Places disponibles</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for inscription in inscriptions %}
-                                        <tr>
-                                            <td>
-                                                <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}" class="text-decoration-none">
-                                                    {{ inscription.formation.titre }}
-                                                </a>
-                                            </td>
-                                            <td>{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</td>
-                                            <td>{{ inscription.dateInscription|date('d/m/Y H:i') }}</td>
-                                            <td>
-                                                {% if inscription.formation.placesDisponibles > 0 %}
-                                                    <span class="badge bg-success">{{ inscription.formation.placesDisponibles }} places</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Complet</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ path('inscription_valider', {id: inscription.id}) }}" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-check me-1"></i>Traiter
-                                                    </a>
-                                                    <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-sm btn-outline-info">
-                                                        <i class="fas fa-info-circle"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Aucune inscription en attente pour vos formations.
-                            </p>
-                        </div>
+                        <span style="background:#FEF3C7; color:#92400E; font-size:0.78rem; font-weight:600; padding:0.25rem 0.75rem; border-radius:100px;">{{ inscriptions|length }} en attente</span>
                     {% endif %}
                 </div>
+
+                {% if inscriptions|length > 0 %}
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    {% for inscription in inscriptions %}
+                    <div style="background:var(--clr-bg); border:1px solid #FDE68A; border-left:3px solid #F59E0B; border-radius:var(--radius); padding:1rem 1.25rem;">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:0.9rem; font-weight:600; color:var(--clr-text); margin-bottom:0.25rem;">
+                                    {{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}
+                                </div>
+                                <div style="font-size:0.8rem; color:var(--clr-text-muted); margin-bottom:0.5rem;">
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}" style="color:var(--clr-primary);">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                </div>
+                                <div style="font-size:0.75rem; color:var(--clr-text-muted); display:flex; gap:1rem; flex-wrap:wrap;">
+                                    <span><i class="fas fa-calendar me-1"></i>Demandé le {{ inscription.dateInscription|date('d/m/Y') }}</span>
+                                    {% if inscription.formation.placesDisponibles > 0 %}
+                                        <span style="color:#059669;"><i class="fas fa-check-circle me-1"></i>{{ inscription.formation.placesDisponibles }} place(s) dispo.</span>
+                                    {% else %}
+                                        <span style="color:#DC2626;"><i class="fas fa-times-circle me-1"></i>Complet</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2" style="flex-shrink:0;">
+                                <a href="{{ path('inscription_valider', {id: inscription.id}) }}"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check me-1"></i>Traiter
+                                </a>
+                                <a href="{{ path('inscription_details', {id: inscription.id}) }}"
+                                   style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:var(--radius-sm); background:var(--clr-surface); border:1px solid var(--clr-border); color:var(--clr-text-muted); text-decoration:none; font-size:0.85rem;">
+                                    <i class="fas fa-info"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align:center; padding:3rem 1rem; color:var(--clr-text-muted);">
+                    <i class="fas fa-user-check" style="font-size:2.5rem; opacity:0.2; display:block; margin-bottom:1rem;"></i>
+                    <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucune inscription en attente</p>
+                    <p style="font-size:0.85rem;">Toutes les inscriptions ont été traitées.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

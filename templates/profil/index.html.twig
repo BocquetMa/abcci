@@ -1,123 +1,103 @@
-{# templates/profil/index.html.twig #}
 {% extends 'base.html.twig' %}
-
-{% block title %}Mon profil - {{ parent() }}{% endblock %}
+{% block title %}Mon profil - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    <div class="row">
+<div class="container" style="max-width:1100px; padding:2rem 1.5rem;">
+    <div class="row g-4">
+
+        <!-- Sidebar -->
         <div class="col-md-3">
             {% include 'profil/_sidebar.html.twig' with {active: 'index'} %}
         </div>
+
+        <!-- Contenu -->
         <div class="col-md-9">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h2 class="mb-0">Mon profil</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-4 text-center">
-                            {% if user.photo is defined and user.photo %}
-                                <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="Photo de profil" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
-                            {% else %}
-                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
-                                    <i class="fas fa-user fa-4x text-secondary"></i>
-                                </div>
+
+            <!-- Carte principale -->
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.75rem; box-shadow:var(--shadow-sm); margin-bottom:1.25rem;">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        {% if user.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="Photo"
+                                 style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:3px solid var(--clr-primary-light);">
+                        {% else %}
+                            <div style="width:96px; height:96px; border-radius:50%; background:linear-gradient(135deg,var(--clr-primary),var(--clr-primary-dark)); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; color:white;">
+                                {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col">
+                        <h2 style="font-size:1.25rem; font-weight:700; color:var(--clr-text); margin:0 0 0.25rem;">{{ user.prenom }} {{ user.nom }}</h2>
+                        <p style="font-size:0.85rem; color:var(--clr-text-muted); margin:0 0 0.5rem;">{{ user.email }}</p>
+                        {% for role in user.roles %}
+                            {% if role != 'ROLE_USER' %}
+                                <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.7rem; font-weight:700; padding:0.2rem 0.65rem; border-radius:100px; letter-spacing:0.04em; margin-right:0.25rem;">{{ role|replace({'ROLE_': ''}) }}</span>
                             {% endif %}
-                            <h4>{{ user.prenom }} {{ user.nom }}</h4>
-                            <p class="text-muted">{{ user.email }}</p>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h1 class="display-4">{% if user.niveau is defined %}{{ user.niveau }}{% else %}1{% endif %}</h1>
-                                            <p class="text-muted mb-0">Niveau actuel</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h1 class="display-4">{% if user.points is defined %}{{ user.points }}{% else %}0{% endif %}</h1>
-                                            <p class="text-muted mb-0">Points accumulés</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Progression</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="progress mb-3">
-                                        {% set progression = 25 %}
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ progression }}%;" aria-valuenow="{{ progression }}" aria-valuemin="0" aria-valuemax="100">{{ progression }}%</div>
-                                    </div>
-                                    <p class="text-center text-muted">Encore quelques points pour passer au niveau suivant</p>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    
-                    {# Affichage des badges récents #}
-                    {% if badges_recents is defined and badges_recents|length > 0 %}
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Mes badges récents</h5>
-                                <a href="{{ path('profil_badges') }}" class="btn btn-sm btn-outline-primary">Voir tous mes badges</a>
-                            </div>
-                            <div class="card-body">
-                                <div class="row row-cols-2 row-cols-md-5 g-3">
-                                    {% for badge in badges_recents %}
-                                        <div class="col text-center">
-                                            <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="text-decoration-none">
-                                                <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 60px;">
-                                                <p class="small text-truncate mb-0">{{ badge.nom }}</p>
-                                                <small class="text-muted">{{ badge.obtenuLe|date('d/m/Y') }}</small>
-                                            </a>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            {# Autres informations du profil #}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Mes statistiques</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="bg-light rounded p-3">
-                                <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
-                                <h4>{% if user.formationsCompletees is defined %}{{ user.formationsCompletees }}{% else %}0{% endif %}</h4>
-                                <p class="text-muted mb-0">Formations complétées</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="bg-light rounded p-3">
-                                <i class="fas fa-tasks fa-2x text-success mb-2"></i>
-                                <h4>{% if user.quizReussis is defined %}{{ user.quizReussis }}{% else %}0{% endif %}</h4>
-                                <p class="text-muted mb-0">Quiz réussis</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="bg-light rounded p-3">
-                                <i class="fas fa-award fa-2x text-warning mb-2"></i>
-                                <h4>{% if badges_recents is defined %}{{ badges_recents|length }}{% else %}0{% endif %}</h4>
-                                <p class="text-muted mb-0">Badges obtenus</p>
-                            </div>
-                        </div>
+                    <div class="col-auto">
+                        <a href="{{ path('profil_modifier') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Modifier
+                        </a>
                     </div>
                 </div>
             </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-4">
+                    <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.25rem; text-align:center; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:2rem; font-weight:700; color:var(--clr-primary);">{{ user.inscriptions|length }}</div>
+                        <div style="font-size:0.8rem; color:var(--clr-text-muted); margin-top:0.25rem;">Inscriptions</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.25rem; text-align:center; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:2rem; font-weight:700; color:var(--clr-primary);">{{ user.points ?? 0 }}</div>
+                        <div style="font-size:0.8rem; color:var(--clr-text-muted); margin-top:0.25rem;">Points</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.25rem; text-align:center; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:2rem; font-weight:700; color:var(--clr-primary);">{{ user.niveau ?? 'Débutant' }}</div>
+                        <div style="font-size:0.8rem; color:var(--clr-text-muted); margin-top:0.25rem;">Niveau</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges récents -->
+            {% if badges_recents is defined and badges_recents|length > 0 %}
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm); margin-bottom:1.25rem;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 style="font-size:0.9375rem; font-weight:700; color:var(--clr-text); margin:0;">
+                        <i class="fas fa-award me-2" style="color:var(--clr-primary);"></i>Badges récents
+                    </h3>
+                    <a href="{{ path('profil_badges') }}" class="btn btn-sm btn-outline-primary">Voir tous</a>
+                </div>
+                <div class="row g-3">
+                    {% for badge in badges_recents %}
+                    <div class="col-auto text-center">
+                        <a href="{{ path('profil_badge_details', {id: badge.id}) }}" style="text-decoration:none; display:block;">
+                            <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" style="max-height:48px; object-fit:contain; display:block; margin:0 auto 0.4rem;">
+                            <div style="font-size:0.78rem; font-weight:600; color:var(--clr-text);">{{ badge.nom }}</div>
+                            <div style="font-size:0.7rem; color:var(--clr-text-muted);">{{ badge.obtenuLe|date('d/m/Y') }}</div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Biographie -->
+            {% if user.biographie %}
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm);">
+                <h3 style="font-size:0.9375rem; font-weight:700; color:var(--clr-text); margin:0 0 0.75rem;">
+                    <i class="fas fa-align-left me-2" style="color:var(--clr-primary);"></i>À propos
+                </h3>
+                <p style="font-size:0.875rem; color:var(--clr-text-muted); line-height:1.6; margin:0;">{{ user.biographie }}</p>
+            </div>
+            {% endif %}
+
         </div>
     </div>
 </div>

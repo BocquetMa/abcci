@@ -1,171 +1,170 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ formation.titre }}{% endblock %}
+{% block title %}{{ formation.titre }} - ABCCI{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .formation-header {
+            background: #003189;
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .formation-header h1 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        .formation-header .fr-badge {
+            font-size: 0.8rem;
+        }
+        .info-block {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+        }
+        .info-block:last-child { border-bottom: none; }
+        .info-block .info-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e8edff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #003189;
+            font-size: 0.75rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e1e1e;
+            border-left: 3px solid #003189;
+            padding-left: 0.75rem;
+            margin: 1.5rem 0 1rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    {# Messages flash #}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h1 class="mb-0 h2">{{ formation.titre }}</h1>
-            {% if formation.placesDisponibles > 0 %}
-                <span class="badge bg-success">{{ formation.placesDisponibles }} places disponibles</span>
-            {% else %}
-                <span class="badge bg-danger">Complet</span>
-            {% endif %}
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-8">
-                    <h3>Description</h3>
-                    <p class="lead">{{ formation.description }}</p>
-                    
-                    <h4 class="mt-4">Informations</h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-graduation-cap me-2"></i> <strong>Niveau :</strong> {{ formation.niveau }}</li>
-                                <li><i class="fas fa-folder me-2"></i> <strong>Thème :</strong> {{ formation.theme }}</li>
-                                <li><i class="fas fa-clock me-2"></i> <strong>Durée :</strong> {{ formation.duree }}h</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-calendar-alt me-2"></i> <strong>Début :</strong> {{ formation.dateDebut|date('d/m/Y') }}</li>
-                                <li><i class="fas fa-calendar-check me-2"></i> <strong>Fin :</strong> {{ formation.dateFin|date('d/m/Y') }}</li>
-                                <li><i class="fas fa-tag me-2"></i> <strong>Prix :</strong> {{ formation.prix }}€</li>
-                            </ul>
-                        </div>
-                    </div>
+<!-- En-tête formation -->
+<div class="formation-header">
+    <div class="fr-container">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="fr-h2">{{ formation.titre }}</h1>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    {% if formation.theme is defined and formation.theme %}
+                        <span class="fr-badge fr-badge--blue-cumulus">{{ formation.theme }}</span>
+                    {% endif %}
+                    {% if formation.niveau is defined and formation.niveau %}
+                        <span class="fr-badge fr-badge--purple-glycine">{{ formation.niveau }}</span>
+                    {% endif %}
                 </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h4 class="mb-0">Formateur</h4>
+            </div>
+            <div>
+                {% if formation.placesDisponibles > 0 %}
+                    <span class="fr-badge fr-badge--success fr-badge--no-icon" style="font-size:0.85rem; padding:0.4rem 0.9rem;">
+                        {{ formation.placesDisponibles }} place{{ formation.placesDisponibles > 1 ? 's' : '' }} disponible{{ formation.placesDisponibles > 1 ? 's' : '' }}
+                    </span>
+                {% else %}
+                    <span class="fr-badge fr-badge--error fr-badge--no-icon" style="font-size:0.85rem; padding:0.4rem 0.9rem;">
+                        Complet
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fr-container fr-mb-6w">
+    <div class="row g-4">
+        <!-- Colonne principale -->
+        <div class="col-lg-8">
+            <!-- Description -->
+            <div class="fr-card fr-p-3w">
+                <h2 class="section-title">Description</h2>
+                <p class="fr-text--lead">{{ formation.description }}</p>
+
+                <h2 class="section-title">Informations</h2>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-graduation-cap"></i></span>
+                            <span><strong>Niveau :</strong> {{ formation.niveau }}</span>
                         </div>
-                        <div class="card-body">
-                            <p><strong>{{ formation.formateur.prenom }} {{ formation.formateur.nom }}</strong></p>
-                            <p class="text-muted">{{ formation.formateur.biographie|u.truncate(150, '...') }}</p>
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-folder"></i></span>
+                            <span><strong>Thème :</strong> {{ formation.theme }}</span>
+                        </div>
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-clock"></i></span>
+                            <span><strong>Durée :</strong> {{ formation.duree }}h</span>
                         </div>
                     </div>
-                    
-                    {# Ajout du bloc d'inscription pour les utilisateurs connectés #}
-                    <div class="card mt-3">
-                        <div class="card-header bg-light">
-                            <h4 class="mb-0">Inscription</h4>
+                    <div class="col-sm-6">
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-calendar-alt"></i></span>
+                            <span><strong>Début :</strong> {{ formation.dateDebut|date('d/m/Y') }}</span>
                         </div>
-                        <div class="card-body">
-                            {% if is_granted('ROLE_USER') %}
-                                {% if inscription is defined and inscription %}
-                                    {% if inscription.statut == 'en_attente' %}
-                                        <div class="alert alert-warning">
-                                            <i class="fas fa-clock me-2"></i>Votre demande d'inscription est en attente de validation.
-                                        </div>
-                                        <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-warning w-100">
-                                            <i class="fas fa-eye me-1"></i>Voir ma demande
-                                        </a>
-                                        <a href="{{ path('inscription_annuler', {id: inscription.id}) }}" class="btn btn-outline-danger w-100 mt-2" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette demande d\'inscription ?')">
-                                            <i class="fas fa-times me-1"></i>Annuler ma demande
-                                        </a>
-                                    {% elseif inscription.statut == 'acceptee' %}
-                                        <div class="alert alert-success">
-                                            <i class="fas fa-check-circle me-2"></i>Vous êtes inscrit à cette formation.
-                                        </div>
-                                        <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-success w-100">
-                                            <i class="fas fa-eye me-1"></i>Voir les détails
-                                        </a>
-                                    {% elseif inscription.statut == 'refusee' %}
-                                        <div class="alert alert-danger">
-                                            <i class="fas fa-times-circle me-2"></i>Votre demande a été refusée.
-                                            {% if inscription.motif %}
-                                                <p class="mt-2 mb-0"><strong>Motif :</strong> {{ inscription.motif }}</p>
-                                            {% endif %}
-                                        </div>
-                                        <a href="{{ path('inscription_demande', {id: formation.id}) }}" class="btn btn-outline-primary w-100">
-                                            <i class="fas fa-redo me-1"></i>Faire une nouvelle demande
-                                        </a>
-                                    {% endif %}
-                                {% else %}
-                                    {% if complet %}
-                                        <div class="alert alert-danger">
-                                            <i class="fas fa-ban me-2"></i>Cette formation est complète.
-                                        </div>
-                                        <button class="btn btn-secondary w-100" disabled>
-                                            <i class="fas fa-user-plus me-1"></i>S'inscrire
-                                        </button>
-                                    {% else %}
-                                        <p>Intéressé(e) par cette formation ? Inscrivez-vous dès maintenant !</p>
-                                        <a href="{{ path('inscription_demande', {id: formation.id}) }}" class="btn btn-primary w-100">
-                                            <i class="fas fa-user-plus me-1"></i>S'inscrire
-                                        </a>
-                                    {% endif %}
-                                {% endif %}
-                            {% else %}
-                                <p>Connectez-vous pour vous inscrire à cette formation.</p>
-                                <a href="{{ path('app_login') }}" class="btn btn-outline-primary w-100">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Se connecter
-                                </a>
-                            {% endif %}
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-calendar-check"></i></span>
+                            <span><strong>Fin :</strong> {{ formation.dateFin|date('d/m/Y') }}</span>
+                        </div>
+                        <div class="info-block">
+                            <span class="info-icon"><i class="fas fa-tag"></i></span>
+                            <span><strong>Prix :</strong> {{ formation.prix }}€</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {% if is_granted('ROLE_FORMATEUR') or is_granted('ROLE_ADMIN') %}
-                {# Section documents #}
-                <div class="mt-4">
-                    <h4>Documents pédagogiques</h4>
-                    {% if formation.documents|length > 0 %}
-                        <div class="list-group">
-                            {% for document in formation.documents %}
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="fas fa-file-{{ document.extension|default('alt') }} me-2"></i>
-                                        {{ document.nom }}
-                                    </div>
-                                    <div>
-                                        <a href="{{ path('document_telecharger', {'id': document.id}) }}" 
-                                           class="btn btn-sm btn-primary me-2">
-                                            <i class="fas fa-download"></i>
+            <!-- Documents pédagogiques -->
+            <div class="fr-card fr-p-3w">
+                <h2 class="section-title">Documents pédagogiques</h2>
+                {% if formation.documents|length > 0 %}
+                    <ul class="fr-raw-list">
+                        {% for document in formation.documents %}
+                            <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span>
+                                    <i class="fas fa-file me-2 text-primary"></i>
+                                    {{ document.nom }}
+                                </span>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ path('document_telecharger', {'id': document.id}) }}"
+                                       class="fr-btn fr-btn--sm fr-btn--secondary fr-icon-download-line fr-btn--icon-left">
+                                        Télécharger
+                                    </a>
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <a href="{{ path('formation_document_supprimer', {'id': document.id}) }}"
+                                           class="fr-btn fr-btn--sm fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left"
+                                           onclick="return confirm('Supprimer ce document ?')">
+                                            Supprimer
                                         </a>
-                                        {% if is_granted('ROLE_ADMIN') %}
-                                            <a href="{{ path('formation_document_supprimer', {'id': document.id}) }}" 
-                                               class="btn btn-sm btn-danger"
-                                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        {% endif %}
-                                    </div>
+                                    {% endif %}
                                 </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            Aucun document n'est disponible pour le moment.
-                        </div>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-        
-        {# Section pour les participants inscrits (visible uniquement par les formateurs et admin) #}
-        {% if is_granted('ROLE_FORMATEUR') or is_granted('ROLE_ADMIN') %}
-            <div class="card-footer bg-white">
-                <h4>Participants inscrits</h4>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="fr-alert fr-alert--info fr-alert--sm">
+                        <p>Aucun document disponible pour cette formation.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Participants (formateurs/admin) -->
+            <div class="fr-card fr-p-3w">
+                <h2 class="section-title">Participants inscrits</h2>
                 {% set inscriptions_acceptees = formation.inscriptions|filter(i => i.statut == 'acceptee') %}
-                
                 {% if inscriptions_acceptees|length > 0 %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <div class="fr-table fr-table--bordered fr-table--no-caption">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>Participant</th>
@@ -183,20 +182,23 @@
                                         <td>{{ inscription.dateConfirmation|date('d/m/Y') }}</td>
                                         <td>
                                             {% if inscription.estTerminee %}
-                                                <span class="badge bg-info">Terminée</span>
+                                                <span class="fr-badge fr-badge--info fr-badge--sm">Terminée</span>
                                             {% else %}
-                                                <span class="badge bg-success">En cours</span>
+                                                <span class="fr-badge fr-badge--success fr-badge--sm">En cours</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-sm btn-outline-info">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            {% if not inscription.estTerminee %}
-                                                <a href="{{ path('inscription_terminer', {id: inscription.id}) }}" class="btn btn-sm btn-outline-success" onclick="return confirm('Marquer cette formation comme terminée pour ce participant ?')">
-                                                    <i class="fas fa-check"></i>
-                                                </a>
-                                            {% endif %}
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ path('inscription_details', {id: inscription.id}) }}"
+                                                   class="fr-btn fr-btn--sm fr-btn--tertiary fr-icon-eye-line"
+                                                   title="Voir les détails"></a>
+                                                {% if not inscription.estTerminee %}
+                                                    <a href="{{ path('inscription_terminer', {id: inscription.id}) }}"
+                                                       class="fr-btn fr-btn--sm fr-btn--tertiary fr-icon-check-line"
+                                                       title="Marquer terminée"
+                                                       onclick="return confirm('Marquer cette formation comme terminée ?')"></a>
+                                                {% endif %}
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -204,17 +206,16 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-info">
-                        Aucun participant inscrit pour le moment.
+                    <div class="fr-alert fr-alert--info fr-alert--sm">
+                        <p>Aucun participant inscrit pour le moment.</p>
                     </div>
                 {% endif %}
-                
-                {# Demandes en attente #}
+
                 {% set inscriptions_attente = formation.inscriptions|filter(i => i.statut == 'en_attente') %}
                 {% if inscriptions_attente|length > 0 %}
-                    <h5 class="mt-4">Demandes en attente ({{ inscriptions_attente|length }})</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <h3 class="section-title fr-mt-3w">Demandes en attente ({{ inscriptions_attente|length }})</h3>
+                    <div class="fr-table fr-table--bordered fr-table--no-caption">
+                        <table>
                             <thead>
                                 <tr>
                                     <th>Participant</th>
@@ -228,8 +229,9 @@
                                         <td>{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</td>
                                         <td>{{ inscription.dateInscription|date('d/m/Y') }}</td>
                                         <td>
-                                            <a href="{{ path('inscription_valider', {id: inscription.id}) }}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-check me-1"></i>Traiter
+                                            <a href="{{ path('inscription_valider', {id: inscription.id}) }}"
+                                               class="fr-btn fr-btn--sm fr-icon-check-line fr-btn--icon-left">
+                                                Traiter
                                             </a>
                                         </td>
                                     </tr>
@@ -239,26 +241,102 @@
                     </div>
                 {% endif %}
             </div>
-        {% endif %}
-    </div>
-
-    <div class="d-flex justify-content-between">
-        <a href="{{ path('formation_lister') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
-        </a>
-        
-        <div>
-            {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('formation_modifier', {'id': formation.id}) }}" class="btn btn-warning me-2">
-                    <i class="fas fa-edit me-1"></i> Modifier
-                </a>
-                <a href="{{ path('formation_supprimer', {'id': formation.id}) }}" 
-                   class="btn btn-danger"
-                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')">
-                    <i class="fas fa-trash me-1"></i> Supprimer
-                </a>
             {% endif %}
         </div>
+
+        <!-- Colonne latérale -->
+        <div class="col-lg-4">
+            <!-- Formateur -->
+            <div class="fr-card fr-p-3w fr-mb-3w">
+                <h2 class="section-title">Formateur</h2>
+                <p class="fw-bold mb-1">{{ formation.formateur.prenom }} {{ formation.formateur.nom }}</p>
+                {% if formation.formateur.biographie is defined and formation.formateur.biographie %}
+                    <p class="text-muted" style="font-size:0.875rem;">
+                        {{ formation.formateur.biographie|u.truncate(150, '...') }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Inscription -->
+            <div class="fr-card fr-p-3w">
+                <h2 class="section-title">Inscription</h2>
+                {% if is_granted('ROLE_USER') %}
+                    {% if inscription is defined and inscription %}
+                        {% if inscription.statut == 'en_attente' %}
+                            <div class="fr-alert fr-alert--warning fr-alert--sm fr-mb-2w" role="alert">
+                                <p>Votre demande est en attente de validation.</p>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="fr-btn fr-btn--secondary">
+                                    <span class="fr-icon-eye-line me-1" aria-hidden="true"></span> Voir ma demande
+                                </a>
+                                <a href="{{ path('inscription_annuler', {id: inscription.id}) }}"
+                                   class="fr-btn fr-btn--tertiary"
+                                   onclick="return confirm('Annuler votre demande d\'inscription ?')">
+                                    <span class="fr-icon-close-line me-1" aria-hidden="true"></span> Annuler
+                                </a>
+                            </div>
+                        {% elseif inscription.statut == 'acceptee' %}
+                            <div class="fr-alert fr-alert--success fr-alert--sm fr-mb-2w" role="alert">
+                                <p>Vous êtes inscrit(e) à cette formation.</p>
+                            </div>
+                            <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="fr-btn w-100" style="justify-content:center;">
+                                Voir les détails
+                            </a>
+                        {% elseif inscription.statut == 'refusee' %}
+                            <div class="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
+                                <p>Votre demande a été refusée.
+                                {% if inscription.motif %}<br><strong>Motif :</strong> {{ inscription.motif }}{% endif %}</p>
+                            </div>
+                            <a href="{{ path('inscription_demande', {id: formation.id}) }}" class="fr-btn fr-btn--secondary w-100" style="justify-content:center;">
+                                Nouvelle demande
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        {% if complet is defined and complet %}
+                            <div class="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
+                                <p>Cette formation est complète.</p>
+                            </div>
+                            <button class="fr-btn w-100" disabled style="justify-content:center;">
+                                S'inscrire
+                            </button>
+                        {% else %}
+                            <p style="font-size:0.875rem; color:#555;">
+                                Intéressé(e) par cette formation ? Inscrivez-vous dès maintenant !
+                            </p>
+                            <a href="{{ path('inscription_demande', {id: formation.id}) }}" class="fr-btn w-100" style="justify-content:center;">
+                                <span class="fr-icon-user-add-line me-1" aria-hidden="true"></span>
+                                S'inscrire
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <p style="font-size:0.875rem; color:#555;">Connectez-vous pour vous inscrire à cette formation.</p>
+                    <a href="{{ path('app_login') }}" class="fr-btn fr-btn--secondary w-100" style="justify-content:center;">
+                        Se connecter
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between align-items-center fr-mt-3w flex-wrap gap-2">
+        <a href="{{ path('formation_lister') }}" class="fr-btn fr-btn--secondary fr-icon-arrow-left-line fr-btn--icon-left">
+            Retour à la liste
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="d-flex gap-2">
+                <a href="{{ path('formation_modifier', {'id': formation.id}) }}" class="fr-btn fr-btn--secondary fr-icon-edit-line fr-btn--icon-left">
+                    Modifier
+                </a>
+                <a href="{{ path('formation_supprimer', {'id': formation.id}) }}"
+                   class="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left"
+                   onclick="return confirm('Supprimer définitivement cette formation ?')">
+                    Supprimer
+                </a>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

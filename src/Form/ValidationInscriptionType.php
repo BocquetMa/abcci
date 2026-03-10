@@ -32,26 +32,14 @@ class ValidationInscriptionType extends AbstractType
         ->add('dateDebut', DateTimeType::class, [
             'label' => 'Date de début',
             'widget' => 'single_text',
-            'required' => true, // Important : marquer comme requis
+            'required' => false,
             'mapped' => false,
-            'constraints' => [
-                new NotBlank([
-                    'message' => 'La date de début est obligatoire',
-                    'groups' => ['accepter']
-                ])
-            ]
         ])
         ->add('dateFin', DateTimeType::class, [
             'label' => 'Date de fin',
             'widget' => 'single_text',
-            'required' => true, // Important : marquer comme requis
+            'required' => false,
             'mapped' => false,
-            'constraints' => [
-                new NotBlank([
-                    'message' => 'La date de fin est obligatoire',
-                    'groups' => ['accepter']
-                ])
-            ]
         ])
             ->add('motif', TextareaType::class, [
                 'label' => 'Motif du refus',

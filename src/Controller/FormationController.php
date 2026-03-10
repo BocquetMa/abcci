@@ -52,30 +52,43 @@ class FormationController extends AbstractController
     }
 
     #[Route('/ajouter', name: 'ajouter')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_FORMATEUR')]
     public function ajouter(
-        Request $request, 
+        Request $request,
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger
     ): Response {
         $formation = new Formation();
-        $form = $this->createForm(FormationType::class, $formation);
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        $form = $this->createForm(FormationType::class, $formation, [
+            'show_formateur' => $isAdmin,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Si ce n'est pas un admin, on assigne le formateur connecté
+            if (!$isAdmin) {
+                /** @var \App\Entity\Formateur $user */
+                $user = $this->getUser();
+                $formation->setFormateur($user);
+            }
+
             // Gérer les documents uploadés
-            $documents = $form->get('documents')->getData();
-            foreach ($documents as $documentFile) {
-                if ($documentFile instanceof UploadedFile) {
-                    $this->handleDocumentUpload($documentFile, $formation, $slugger, $entityManager);
+            if ($form->has('documents')) {
+                $documents = $form->get('documents')->getData();
+                foreach ($documents as $documentFile) {
+                    if ($documentFile instanceof UploadedFile) {
+                        $this->handleDocumentUpload($documentFile, $formation, $slugger, $entityManager);
+                    }
                 }
             }
 
             $entityManager->persist($formation);
             $entityManager->flush();
-            
+
             $this->addFlash('success', 'Formation ajoutée avec succès');
-            return $this->redirectToRoute('formation_lister');
+            return $this->redirectToRoute('formateur_mes_formations');
         }
 
         return $this->render('formation/ajouter.html.twig', [
@@ -84,28 +97,33 @@ class FormationController extends AbstractController
     }
 
     #[Route('/modifier/{id}', name: 'modifier')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_FORMATEUR')]
     public function modifier(
-        Formation $formation, 
-        Request $request, 
+        Formation $formation,
+        Request $request,
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger
     ): Response {
-        $form = $this->createForm(FormationType::class, $formation);
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
+        $form = $this->createForm(FormationType::class, $formation, [
+            'show_formateur' => $isAdmin,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gérer les nouveaux documents
-            $documents = $form->get('documents')->getData();
-            foreach ($documents as $documentFile) {
-                if ($documentFile instanceof UploadedFile) {
-                    $this->handleDocumentUpload($documentFile, $formation, $slugger, $entityManager);
+            if ($form->has('documents')) {
+                $documents = $form->get('documents')->getData();
+                foreach ($documents as $documentFile) {
+                    if ($documentFile instanceof UploadedFile) {
+                        $this->handleDocumentUpload($documentFile, $formation, $slugger, $entityManager);
+                    }
                 }
             }
 
             $entityManager->flush();
             $this->addFlash('success', 'Formation modifiée avec succès');
-            return $this->redirectToRoute('formation_lister');
+            return $this->redirectToRoute('formateur_mes_formations');
         }
 
         return $this->render('formation/modifier.html.twig', [

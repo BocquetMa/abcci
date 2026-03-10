@@ -1,1365 +1,783 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Conversation avec {{ destinataire.prenom }} {{ destinataire.nom }} | ABCCI{% endblock %}
+{% block title %}{{ destinataire.prenom }} {{ destinataire.nom }} | Messagerie ABCCI{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .messaging-container {
-            display: flex;
-            height: calc(100vh - var(--header-height) - 40px);
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            margin: 20px;
-        }
-        
-        .conversations-sidebar {
-            width: 300px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .conversations-header {
-            padding: 15px;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .conversations-header h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .new-message-btn {
-            background-color: white;
-            color: var(--primary);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        
-        .new-message-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .search-box {
-            padding: 15px;
-            background-color: white;
-            border-bottom: 1px solid #e9ecef;
-            position: relative;
-        }
-        
-        .search-box .search-icon {
-            position: absolute;
-            left: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #adb5bd;
-            z-index: 1;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 10px 15px 10px 35px;
-            border: 1px solid #e9ecef;
-            border-radius: 20px;
-            background-color: #f8f9fa;
-            transition: all 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: white;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        
-        .conversations-list {
-            flex: 1;
-            overflow-y: auto;
-            padding-bottom: 10px;
-        }
-        
-        .conversations-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .conversations-list::-webkit-scrollbar-track {
-            background-color: transparent;
-        }
-        
-        .conversations-list::-webkit-scrollbar-thumb {
-            background-color: #dee2e6;
-            border-radius: 3px;
-        }
-        
-        .conversations-list::-webkit-scrollbar-thumb:hover {
-            background-color: #adb5bd;
-        }
-        
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: inherit;
-        }
-        
-        .conversation-item:hover {
-            background-color: #e9ecef;
-            transform: translateX(3px);
-        }
-        
-        .conversation-item.active {
-            background-color: rgba(13, 110, 253, 0.1);
-            border-left: 3px solid var(--primary);
-        }
-        
-        .conversation-item.unread {
-            background-color: rgba(13, 110, 253, 0.05);
-            font-weight: 500;
-        }
-        
-        .conversation-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            margin-right: 15px;
-            position: relative;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: 2px solid #e9ecef;
-        }
-        
-        .conversation-item.active .conversation-avatar {
-            border-color: var(--primary);
-        }
-        
-        .conversation-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .conversation-avatar .online-indicator {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: #40c057;
-            border-radius: 50%;
-            bottom: 3px;
-            right: 3px;
-            border: 2px solid white;
-        }
-        
-        .conversation-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .conversation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 5px;
-        }
-        
-        .conversation-name {
-            font-weight: 600;
-            color: var(--dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .conversation-time {
-            font-size: 0.8rem;
-            color: #6c757d;
-            white-space: nowrap;
-        }
-        
-        .conversation-preview {
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.9rem;
-            max-width: 180px;
-        }
-        
-        .unread-indicator {
-            width: 18px;
-            height: 18px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            margin-left: 10px;
-            flex-shrink: 0;
-        }
-        
-        /* Chat main area */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: #f8f9fa;
-        }
-        
-        .chat-header {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: white;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .chat-user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            margin-right: 15px;
-            overflow: hidden;
-            border: 2px solid var(--primary);
-            flex-shrink: 0;
-        }
-        
-        .chat-user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .chat-user-info {
-            flex: 1;
-        }
-        
-        .chat-user-name {
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 1.1rem;
-        }
-        
-        .chat-user-status {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-        
-        .chat-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-action-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background-color: #f8f9fa;
-            border: none;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .chat-action-btn:hover {
-            background-color: var(--primary);
-            color: white;
-            transform: scale(1.05);
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-color: #f0f2f5;
-        }
-        
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-track {
-            background-color: transparent;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb {
-            background-color: #dee2e6;
-            border-radius: 3px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background-color: #adb5bd;
-        }
-        
-        .message-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            max-width: 70%;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .message-group.sent {
-            align-self: flex-end;
-        }
-        
-        .message-group.received {
-            align-self: flex-start;
-        }
-        
-        .message-bubble {
-            padding: 12px 15px;
-            border-radius: 18px;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            word-break: break-word;
-        }
-        
-        .message-group.sent .message-bubble {
-            background-color: var(--primary);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-        
-        .message-group.received .message-bubble {
-            background-color: white;
-            border-bottom-left-radius: 4px;
-        }
-        
-        .message-time {
-            font-size: 0.7rem;
-            align-self: flex-end;
-            margin-top: 2px;
-            color: #adb5bd;
-        }
-        
-        .message-date-divider {
-            display: flex;
-            align-items: center;
-            color: #6c757d;
-            margin: 20px 0;
-            font-size: 0.8rem;
-        }
-        
-        .message-date-divider::before,
-        .message-date-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background-color: #dee2e6;
-        }
-        
-        .message-date-divider::before {
-            margin-right: 15px;
-        }
-        
-        .message-date-divider::after {
-            margin-left: 15px;
-        }
-        
-        .chat-input-container {
-            padding: 20px;
-            background-color: white;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .chat-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .chat-attachment-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background-color: #f8f9fa;
-            border: none;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .chat-attachment-btn:hover {
-            background-color: #e9ecef;
-            color: var(--primary);
-        }
-        
-        .chat-input-field {
-            flex: 1;
-            position: relative;
-        }
-        
-        .chat-input-field textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 20px;
-            resize: none;
-            max-height: 120px;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-        }
-        
-        .chat-input-field textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        
-        .chat-send-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            border: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .chat-send-btn:hover {
-            background-color: var(--bs-primary-dark, #0b5ed7);
-            transform: scale(1.05);
-        }
-        
-        .chat-send-btn:disabled {
-            background-color: #adb5bd;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* Typing indicator */
-        .typing-indicator {
-            display: flex;
-            align-items: center;
-            margin-top: 5px;
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-        
-        .typing-dots {
-            display: flex;
-            margin-left: 5px;
-        }
-        
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #6c757d;
-            border-radius: 50%;
-            margin-right: 3px;
-            animation: typing-animation 1.4s infinite ease-in-out;
-        }
-        
-        .typing-dot:nth-child(1) {
-            animation-delay: 0s;
-        }
-        
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-            margin-right: 0;
-        }
-        
-        @keyframes typing-animation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.5); }
-            100% { transform: scale(1); }
-        }
-        
-        /* File attachment */
-        .attachment-preview {
-            margin-top: 10px;
-            padding: 12px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            border: 1px dashed #ced4da;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .attachment-icon {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        
-        .attachment-info {
-            flex: 1;
-        }
-        
-        .attachment-name {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .attachment-size {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-        
-        .attachment-remove {
-            color: #dc3545;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 1rem;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .attachment-remove:hover {
-            background-color: rgba(220, 53, 69, 0.1);
-        }
-        
-        .message-attachment {
-            margin-top: 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .message-group.received .message-attachment {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        
-        .attachment-link {
-            color: inherit;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-        }
-        
-        .attachment-link:hover {
-            text-decoration: underline;
-        }
-        
-        /* Styles améliorés pour la modal de recherche d'utilisateurs */
-        .new-message-modal .modal-content {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+{{ parent() }}
+<style>
+    /* ─── Layout ──────────────────────────────────────── */
+    .msg-layout {
+        display: flex;
+        height: calc(100vh - 60px);
+        background: var(--clr-bg);
+        overflow: hidden;
+    }
 
-        .new-message-modal .modal-header {
-            background-color: var(--primary);
-            color: white;
-            border-bottom: none;
-            border-radius: 12px 12px 0 0;
-            padding: 16px 20px;
-        }
+    /* ─── Sidebar ─────────────────────────────────────── */
+    .msg-sidebar {
+        width: 300px;
+        flex-shrink: 0;
+        background: var(--clr-surface);
+        border-right: 1px solid var(--clr-border);
+        display: flex;
+        flex-direction: column;
+    }
+    .msg-sidebar-head {
+        padding: 1rem 1.1rem;
+        border-bottom: 1px solid var(--clr-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .msg-sidebar-head h2 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--clr-text);
+        margin: 0;
+    }
+    .msg-compose-btn {
+        width: 30px; height: 30px;
+        border-radius: var(--radius-sm);
+        background: var(--clr-primary-muted);
+        border: none;
+        color: var(--clr-primary);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.8rem;
+        transition: background 0.15s;
+    }
+    .msg-compose-btn:hover { background: var(--clr-primary-light); }
 
-        .new-message-modal .modal-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
+    .msg-search {
+        padding: 0.65rem 0.875rem;
+        border-bottom: 1px solid var(--clr-border);
+        flex-shrink: 0;
+    }
+    .msg-search-input {
+        width: 100%;
+        padding: 0.45rem 0.875rem;
+        border: 1px solid var(--clr-border);
+        border-radius: 100px;
+        background: var(--clr-bg);
+        font-size: 0.8rem;
+        color: var(--clr-text);
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .msg-search-input:focus {
+        border-color: var(--clr-primary);
+        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+        background: white;
+    }
+    .msg-search-input::placeholder { color: var(--clr-text-light); }
 
-        .new-message-modal .modal-body {
-            padding: 24px;
-        }
+    .msg-conv-list { flex: 1; overflow-y: auto; }
+    .msg-conv-list::-webkit-scrollbar { width: 3px; }
+    .msg-conv-list::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 2px; }
 
-        /* Amélioration du champ de recherche */
-        .destinataire-search-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
+    .msg-conv-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 1.1rem;
+        border-bottom: 1px solid var(--clr-border);
+        text-decoration: none;
+        transition: background 0.12s;
+    }
+    .msg-conv-item:hover { background: var(--clr-bg); }
+    .msg-conv-item.active {
+        background: var(--clr-primary-muted);
+        border-left: 2px solid var(--clr-primary);
+    }
+    .msg-conv-item.unread .msg-conv-name { font-weight: 700; }
 
-        .destinataire-search-container .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #adb5bd;
-            z-index: 2;
-        }
+    .msg-avatar {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.72rem; font-weight: 700; color: white;
+        flex-shrink: 0; overflow: hidden;
+    }
+    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .msg-avatar.lg { width: 42px; height: 42px; font-size: 0.82rem; }
+    .msg-avatar.xl { width: 52px; height: 52px; font-size: 1rem; }
 
-        #destinataireSearch {
-            padding: 12px 12px 12px 40px;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-            background-color: #f8f9fa;
-            font-size: 1rem;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
+    .msg-conv-body { flex: 1; min-width: 0; }
+    .msg-conv-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 0.15rem;
+    }
+    .msg-conv-name { font-size: 0.82rem; font-weight: 600; color: var(--clr-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-conv-time { font-size: 0.7rem; color: var(--clr-text-light); white-space: nowrap; margin-left: 0.4rem; flex-shrink: 0; }
+    .msg-conv-preview { font-size: 0.77rem; color: var(--clr-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--clr-primary); flex-shrink: 0; }
 
-        #destinataireSearch:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-            background-color: white;
-        }
+    /* ─── Chat area ───────────────────────────────────── */
+    .msg-chat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: #F9FAFB;
+    }
 
-        /* Amélioration des résultats de recherche */
-        .user-search-results {
-            max-height: 350px;
-            overflow-y: auto;
-            border-radius: 10px;
-            background-color: white;
-        }
+    /* Chat header */
+    .msg-chat-header {
+        background: var(--clr-surface);
+        border-bottom: 1px solid var(--clr-border);
+        padding: 0.9rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        flex-shrink: 0;
+        box-shadow: 0 1px 0 var(--clr-border);
+    }
+    .msg-chat-header-info { flex: 1; min-width: 0; }
+    .msg-chat-header-name {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--clr-text);
+        margin: 0;
+    }
+    .msg-chat-header-sub {
+        font-size: 0.75rem;
+        color: var(--clr-text-muted);
+        margin: 0;
+    }
+    .msg-online-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        display: inline-block;
+        margin-right: 4px;
+    }
 
-        .user-search-results::-webkit-scrollbar {
-            width: 8px;
-        }
+    /* Messages feed */
+    .msg-feed {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .msg-feed::-webkit-scrollbar { width: 4px; }
+    .msg-feed::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
 
-        .user-search-results::-webkit-scrollbar-track {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-        }
+    /* Date divider */
+    .msg-date-divider {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        margin: 1rem 0 0.5rem;
+    }
+    .msg-date-divider::before,
+    .msg-date-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--clr-border);
+    }
+    .msg-date-divider span {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--clr-text-muted);
+        white-space: nowrap;
+        letter-spacing: 0.03em;
+    }
 
-        .user-search-results::-webkit-scrollbar-thumb {
-            background-color: #dee2e6;
-            border-radius: 10px;
-        }
+    /* Message row */
+    .msg-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.15rem;
+    }
+    .msg-row.sent { flex-direction: row-reverse; }
+    .msg-row.sent .msg-avatar { display: none; }
 
-        .user-search-results::-webkit-scrollbar-thumb:hover {
-            background-color: #ced4da;
-        }
+    /* Bubble */
+    .msg-bubble {
+        max-width: 68%;
+        padding: 0.65rem 0.9rem;
+        border-radius: 16px;
+        font-size: 0.875rem;
+        line-height: 1.55;
+        word-break: break-word;
+        position: relative;
+    }
+    .msg-bubble.received {
+        background: var(--clr-surface);
+        color: var(--clr-text);
+        border: 1px solid var(--clr-border);
+        border-bottom-left-radius: 4px;
+        box-shadow: var(--shadow-sm);
+    }
+    .msg-bubble.sent {
+        background: var(--clr-primary);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
 
-        .user-search-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s ease;
-        }
+    .msg-meta {
+        font-size: 0.68rem;
+        margin-top: 0.25rem;
+        padding: 0 0.25rem;
+    }
+    .msg-row.received .msg-meta { color: var(--clr-text-light); text-align: left; }
+    .msg-row.sent .msg-meta { color: var(--clr-text-muted); text-align: right; }
 
-        .user-search-item:hover {
-            background-color: #f0f7ff;
-            transform: translateY(-2px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-        }
+    /* Attachment */
+    .msg-attachment {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        text-decoration: none;
+    }
+    .msg-bubble.received .msg-attachment { background: var(--clr-bg); color: var(--clr-primary); border: 1px solid var(--clr-border); }
+    .msg-bubble.sent .msg-attachment { background: rgba(255,255,255,0.15); color: white; }
 
-        .user-search-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 16px;
-            border: 2px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            flex-shrink: 0;
-        }
+    /* ─── Compose area ────────────────────────────────── */
+    .msg-compose {
+        background: var(--clr-surface);
+        border-top: 1px solid var(--clr-border);
+        padding: 1rem 1.5rem;
+        flex-shrink: 0;
+    }
 
-        .user-search-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .msg-attachment-preview {
+        display: none;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--clr-primary-muted);
+        border: 1px solid var(--clr-primary-light);
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--clr-primary-dark);
+    }
+    .msg-attachment-preview i { font-size: 1rem; }
+    .msg-attachment-preview .remove-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.85rem;
+        line-height: 1;
+    }
+    .msg-attachment-preview .remove-btn:hover { color: var(--clr-danger); }
 
-        .user-search-info {
-            flex: 1;
-            min-width: 0;
-        }
+    .msg-compose-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.75rem;
+    }
+    .msg-compose-input-wrap {
+        flex: 1;
+        position: relative;
+    }
+    #messageContent {
+        width: 100%;
+        resize: none;
+        border: 1px solid var(--clr-border);
+        border-radius: 12px;
+        padding: 0.7rem 1rem;
+        font-size: 0.875rem;
+        font-family: 'Inter', sans-serif;
+        color: var(--clr-text);
+        background: var(--clr-bg);
+        outline: none;
+        min-height: 44px;
+        max-height: 140px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        line-height: 1.5;
+    }
+    #messageContent:focus {
+        border-color: var(--clr-primary);
+        box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+        background: white;
+    }
+    #messageContent::placeholder { color: var(--clr-text-light); }
 
-        .user-search-name {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 4px;
-        }
+    .msg-compose-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .msg-attach-btn {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        background: var(--clr-bg);
+        border: 1px solid var(--clr-border);
+        color: var(--clr-text-muted);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.9rem;
+        transition: border-color 0.15s, color 0.15s;
+    }
+    .msg-attach-btn:hover { border-color: var(--clr-primary); color: var(--clr-primary); }
 
-        .user-search-email {
-            font-size: 0.85rem;
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    .msg-send-btn {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        background: var(--clr-primary);
+        border: none;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.9rem;
+        transition: background 0.15s, transform 0.1s;
+        flex-shrink: 0;
+    }
+    .msg-send-btn:hover:not(:disabled) { background: var(--clr-primary-dark); transform: scale(1.05); }
+    .msg-send-btn:disabled { background: #D1D5DB; cursor: not-allowed; transform: none; }
 
-        .user-search-action {
-            color: var(--primary);
-            background-color: rgba(13, 110, 253, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            opacity: 0;
-        }
+    /* ─── Modals ──────────────────────────────────────── */
+    .msg-modal-header {
+        background: linear-gradient(135deg, var(--clr-primary-dark), var(--clr-primary));
+        color: white;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: 1.1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .msg-modal-header .btn-close { filter: invert(1); opacity: 0.8; }
+    .user-search-item {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.7rem 0.75rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+    .user-search-item:hover { background: var(--clr-primary-muted); }
+    .user-search-info { flex: 1; min-width: 0; }
+    .user-search-name { font-size: 0.875rem; font-weight: 600; color: var(--clr-text); }
+    .user-search-email { font-size: 0.78rem; color: var(--clr-text-muted); }
+    .user-search-action {
+        width: 28px; height: 28px; border-radius: var(--radius-sm);
+        background: var(--clr-primary-muted); color: var(--clr-primary);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; opacity: 0; transition: opacity 0.15s;
+    }
+    .user-search-item:hover .user-search-action { opacity: 1; }
 
-        .user-search-item:hover .user-search-action {
-            opacity: 1;
-        }
+    .search-loading { display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.5rem; color: var(--clr-text-muted); font-size: 0.85rem; }
+    .search-spinner { width: 18px; height: 18px; border: 2px solid var(--clr-primary-light); border-top-color: var(--clr-primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .search-empty-state { text-align: center; padding: 1.5rem; color: var(--clr-text-muted); }
+    .search-empty-state i { font-size: 1.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.35; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .user-search-action:hover {
-            background-color: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        /* États vides et erreurs */
-        .search-empty-state, .search-error-state {
-            text-align: center;
-            padding: 24px 16px;
-            color: #6c757d;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-
-        .search-empty-state i, .search-error-state i {
-            font-size: 2rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .search-empty-state p, .search-error-state p {
-            margin-bottom: 0;
-            font-size: 0.95rem;
-        }
-
-        .search-error-state {
-            color: var(--danger);
-            background-color: rgba(220, 53, 69, 0.05);
-        }
-
-        /* Animation de chargement */
-        .search-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .search-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(13, 110, 253, 0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: search-spinner 0.8s linear infinite;
-            margin-right: 12px;
-        }
-
-        @keyframes search-spinner {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 992px) {
-            .conversations-sidebar {
-                width: 280px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .messaging-container {
-                flex-direction: column;
-                margin: 10px;
-                height: calc(100vh - var(--header-height) - 20px);
-            }
-            
-            .conversations-sidebar {
-                display: flex;
-                width: 100%;
-                height: auto;
-                max-height: 40vh;
-            }
-            
-            .chat-container {
-                height: 60vh;
-            }
-        }
-    </style>
+    /* ─── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+        .msg-layout { flex-direction: column; height: auto; }
+        .msg-sidebar { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid var(--clr-border); }
+        .msg-chat { height: 55vh; }
+        .msg-bubble { max-width: 85%; }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-    <div class="messaging-container">
-        <div class="conversations-sidebar">
-            <div class="conversations-header">
-                <h3><i class="fas fa-comments me-2"></i> Conversations</h3>
-                <button class="new-message-btn" data-bs-toggle="modal" data-bs-target="#newMessageModal">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            
-            <div class="search-box">
-                <span class="search-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" class="search-input" placeholder="Rechercher..." id="conversationSearch">
-            </div>
-            
-            <div class="conversations-list">
-                {% for conversation in app.user.conversations|default([]) %}
-                    {% set otherUser = conversation.expediteur.id == app.user.id ? conversation.destinataire : conversation.expediteur %}
-                    <a href="{{ path('messagerie_conversation', {'id': otherUser.id}) }}" class="conversation-item {% if otherUser.id == destinataire.id %}active{% endif %} {% if not conversation.lu and conversation.destinataire.id == app.user.id %}unread{% endif %}">
-                        <div class="conversation-avatar">
+<div class="msg-layout">
+
+    <!-- ─── Sidebar ───────────────────────────────────── -->
+    <aside class="msg-sidebar">
+        <div class="msg-sidebar-head">
+            <h2><i class="fas fa-comment-dots me-2" style="color:var(--clr-primary);"></i>Messages</h2>
+            <button class="msg-compose-btn" data-bs-toggle="modal" data-bs-target="#newMessageModal" title="Nouveau message">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="msg-search">
+            <input type="text" class="msg-search-input" placeholder="Rechercher..." id="conversationSearch">
+        </div>
+        <div class="msg-conv-list">
+            {% if app.user.conversations is defined and app.user.conversations|length > 0 %}
+                {% for conv in app.user.conversations %}
+                    {% set otherUser = conv.expediteur.id == app.user.id ? conv.destinataire : conv.expediteur %}
+                    {% set isActive = otherUser.id == destinataire.id %}
+                    {% set isUnread = not conv.lu and conv.destinataire.id == app.user.id %}
+                    <a href="{{ path('messagerie_conversation', {'id': otherUser.id}) }}"
+                       class="msg-conv-item {{ isActive ? 'active' : '' }} {{ isUnread ? 'unread' : '' }}">
+                        <div class="msg-avatar">
                             {% if otherUser.photo %}
                                 <img src="{{ asset('uploads/photos/' ~ otherUser.photo) }}" alt="{{ otherUser.prenom }}">
                             {% else %}
-                                <div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                                    <i class="fas fa-user text-white"></i>
-                                </div>
+                                {{ otherUser.prenom|first|upper }}{{ otherUser.nom|first|upper }}
                             {% endif %}
                         </div>
-                        
-                        <div class="conversation-info">
-                            <div class="conversation-header">
-                                <div class="conversation-name">{{ otherUser.prenom }} {{ otherUser.nom }}</div>
-                                <div class="conversation-time">{{ conversation.dateEnvoi|date('H:i') }}</div>
+                        <div class="msg-conv-body">
+                            <div class="msg-conv-row">
+                                <span class="msg-conv-name">{{ otherUser.prenom }} {{ otherUser.nom }}</span>
+                                <span class="msg-conv-time">{{ conv.dateEnvoi|date('H:i') }}</span>
                             </div>
-                            <div class="conversation-preview">
-                                {% if conversation.expediteur.id == app.user.id %}
-                                    <span class="text-muted">Vous:</span>
-                                {% else %}
-                                    <span class="text-muted">{{ otherUser.prenom }}:</span>
-                                {% endif %}
-                                {{ conversation.contenu|slice(0, 30) }}{% if conversation.contenu|length > 30 %}...{% endif %}
+                            <div class="msg-conv-preview">
+                                {% if conv.expediteur.id == app.user.id %}Vous : {% endif %}
+                                {{ conv.contenu|slice(0, 30) }}{% if conv.contenu|length > 30 %}…{% endif %}
                             </div>
                         </div>
-                        
-                        {% if not conversation.lu and conversation.destinataire.id == app.user.id %}
-                            <div class="unread-indicator">1</div>
-                        {% endif %}
+                        {% if isUnread %}<div class="msg-unread-dot"></div>{% endif %}
                     </a>
                 {% endfor %}
+            {% else %}
+                <div style="padding:2rem; text-align:center; color:var(--clr-text-muted);">
+                    <i class="fas fa-inbox" style="font-size:1.75rem; opacity:0.25; display:block; margin-bottom:0.75rem;"></i>
+                    <p style="font-size:0.82rem; margin:0;">Aucune conversation</p>
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- ─── Zone de chat ──────────────────────────────── -->
+    <section class="msg-chat">
+
+        <!-- Header -->
+        <div class="msg-chat-header">
+            <div class="msg-avatar xl">
+                {% if destinataire.photo %}
+                    <img src="{{ asset('uploads/photos/' ~ destinataire.photo) }}" alt="{{ destinataire.prenom }}">
+                {% else %}
+                    {{ destinataire.prenom|first|upper }}{{ destinataire.nom|first|upper }}
+                {% endif %}
+            </div>
+            <div class="msg-chat-header-info">
+                <p class="msg-chat-header-name">{{ destinataire.prenom }} {{ destinataire.nom }}</p>
+                <p class="msg-chat-header-sub">
+                    {% for role in destinataire.roles %}
+                        {% if role != 'ROLE_USER' %}
+                            {{ role|replace({'ROLE_': '', '_': ' '})|title }}
+                        {% endif %}
+                    {% endfor %}
+                    {% if destinataire.email %}· {{ destinataire.email }}{% endif %}
+                </p>
             </div>
         </div>
-        
-        <div class="chat-container">
-            <div class="chat-header">
-                <div class="chat-user-avatar">
-                    {% if destinataire.photo %}
-                        <img src="{{ asset('uploads/photos/' ~ destinataire.photo) }}" alt="{{ destinataire.prenom }}">
-                    {% else %}
-                        <div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                            <i class="fas fa-user text-white"></i>
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="chat-user-info">
-                    <div class="chat-user-name">{{ destinataire.prenom }} {{ destinataire.nom }}</div>
-                    <div class="chat-user-status">
-                        {% if destinataire.dernierLogin %}
-                            Dernière connexion {{ destinataire.dernierLogin|date('d/m/Y H:i') }}
+
+        <!-- Messages -->
+        <div class="msg-feed" id="messagesFeed">
+            {% set lastDate = null %}
+            {% for message in messages %}
+                {% set msgDate = message.dateEnvoi|date('Y-m-d') %}
+                {% if msgDate != lastDate %}
+                    {% set lastDate = msgDate %}
+                    <div class="msg-date-divider">
+                        <span>
+                            {% if msgDate == "now"|date('Y-m-d') %}Aujourd'hui
+                            {% elseif msgDate == ("now - 1 day")|date('Y-m-d') %}Hier
+                            {% else %}{{ message.dateEnvoi|date('d/m/Y') }}
+                            {% endif %}
+                        </span>
+                    </div>
+                {% endif %}
+
+                {% set isSent = message.expediteur.id == app.user.id %}
+                <div class="msg-row {{ isSent ? 'sent' : 'received' }}" data-message-id="{{ message.id }}">
+                    {% if not isSent %}
+                    <div class="msg-avatar">
+                        {% if destinataire.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ destinataire.photo) }}" alt="{{ destinataire.prenom }}">
                         {% else %}
-                            Membre depuis {{ destinataire.id|date('d/m/Y') }}
+                            {{ destinataire.prenom|first|upper }}{{ destinataire.nom|first|upper }}
                         {% endif %}
                     </div>
-                </div>
-                
-                <div class="chat-actions">
-                    <button class="chat-action-btn" title="Rechercher" id="searchMessages">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button class="chat-action-btn" title="Informations" data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="chat-messages" id="chatMessages">
-                {% set currentDate = null %}
-                {% for message in messages %}
-                    {% set messageDate = message.dateEnvoi|date('Y-m-d') %}
-                    {% if currentDate != messageDate %}
-                        <div class="message-date-divider">
-                            {% if messageDate == "now"|date('Y-m-d') %}
-                                Aujourd'hui
-                            {% elseif messageDate == "now"|date_modify("-1 day")|date('Y-m-d') %}
-                                Hier
-                            {% else %}
-                                {{ message.dateEnvoi|date('d/m/Y') }}
-                            {% endif %}
-                        </div>
-                        {% set currentDate = messageDate %}
                     {% endif %}
-                    
-                    <div class="message-group {% if message.expediteur.id == app.user.id %}sent{% else %}received{% endif %}" data-message-id="{{ message.id }}">
-                        <div class="message-bubble">
+                    <div>
+                        <div class="msg-bubble {{ isSent ? 'sent' : 'received' }}">
                             {{ message.contenu|nl2br }}
                             {% if message.pieceJointe %}
-                                <div class="message-attachment">
-                                    <a href="{{ asset('uploads/messages/' ~ message.pieceJointe) }}" target="_blank" class="attachment-link">
-                                        <i class="fas fa-paperclip me-1"></i> {{ message.pieceJointe }}
-                                    </a>
-                                </div>
+                                <a href="{{ asset('uploads/messages/' ~ message.pieceJointe) }}"
+                                   class="msg-attachment" target="_blank">
+                                    <i class="fas fa-paperclip"></i>
+                                    <span>{{ message.pieceJointe }}</span>
+                                </a>
                             {% endif %}
                         </div>
-                        <div class="message-time">
-                            {{ message.dateEnvoi|date('H:i') }}
-                            {% if message.lu and message.expediteur.id == app.user.id %}
-                                <i class="fas fa-check-double ms-1" title="Lu"></i>
-                            {% elseif message.expediteur.id == app.user.id %}
-                                <i class="fas fa-check ms-1" title="Envoyé"></i>
-                            {% endif %}
-                        </div>
+                        <div class="msg-meta">{{ message.dateEnvoi|date('H:i') }}</div>
                     </div>
-                {% endfor %}
-            </div>
-            
-            <div class="chat-input-container">
-                {{ form_start(form, {'attr': {'id': 'message-form'}}) }}
-                    <div class="chat-input-wrapper">
-                        <label for="{{ form.pieceJointe.vars.id }}" class="chat-attachment-btn" title="Joindre un fichier">
-                            <i class="fas fa-paperclip"></i>
-                        </label>
-                        {{ form_widget(form.pieceJointe, {'attr': {'class': 'd-none'}}) }}
-                        
-                        <div class="chat-input-field">
-                            {{ form_widget(form.contenu, {'attr': {'placeholder': 'Écrivez votre message...', 'rows': 1, 'id': 'message-input'}}) }}
-                            
-                            <div id="attachment-preview" class="attachment-preview" style="display: none;">
-                                <i class="fas fa-file attachment-icon"></i>
-                                <div class="attachment-info">
-                                    <div class="attachment-name"></div>
-                                    <div class="attachment-size"></div>
-                                </div>
-                                <button type="button" class="attachment-remove" id="remove-attachment">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="chat-send-btn" id="send-button" disabled>
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                </div>
+            {% else %}
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem; color:var(--clr-text-muted); padding:2rem; text-align:center;">
+                    <div style="width:60px;height:60px;border-radius:50%;background:var(--clr-primary-muted);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--clr-primary);">
+                        <i class="far fa-comment"></i>
                     </div>
-                {{ form_end(form) }}
-            </div>
+                    <p style="font-size:0.875rem;font-weight:600;color:var(--clr-text);margin:0;">Démarrez la conversation</p>
+                    <p style="font-size:0.8rem;margin:0;">Envoyez un premier message à {{ destinataire.prenom }}.</p>
+                </div>
+            {% endfor %}
         </div>
-    </div>
-    
-    <!-- Modal pour nouveau message -->
-    <div class="modal fade new-message-modal" id="newMessageModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Nouveau message</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+
+        <!-- Compose -->
+        <div class="msg-compose">
+            {{ form_start(form, {'attr': {'id': 'messageForm', 'enctype': 'multipart/form-data'}}) }}
+
+            <div class="msg-attachment-preview" id="attachmentPreview">
+                <i class="fas fa-paperclip"></i>
+                <span id="attachmentName"></span>
+                <span id="attachmentSize" style="color:var(--clr-text-light);font-size:0.72rem;"></span>
+                <button type="button" class="remove-btn" id="removeAttachment" title="Supprimer la pièce jointe">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="msg-compose-row">
+                <div class="msg-compose-input-wrap">
+                    {{ form_widget(form.contenu, {
+                        'attr': {
+                            'id': 'messageContent',
+                            'placeholder': 'Écrire un message...',
+                            'rows': 1
+                        }
+                    }) }}
                 </div>
-                <div class="modal-body">
-                    <div class="destinataire-search-container">
-                        <span class="search-icon">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text" id="destinataireSearch" class="form-control" placeholder="Rechercher un utilisateur...">
-                    </div>
-                    
-                    <div id="searchStatus" class="search-loading d-none">
-                        <div class="search-spinner"></div>
-                        <span>Recherche en cours...</span>
-                    </div>
-                    
-                    <div class="user-search-results mt-3">
-                        <!-- Les résultats de la recherche seront ajoutés ici dynamiquement -->
-                    </div>
+                <div class="msg-compose-actions">
+                    <label for="{{ form.pieceJointe.vars.id }}" class="msg-attach-btn" title="Joindre un fichier">
+                        <i class="fas fa-paperclip"></i>
+                    </label>
+                    {{ form_widget(form.pieceJointe, {'attr': {'id': form.pieceJointe.vars.id, 'style': 'display:none;'}}) }}
+                    <button type="submit" class="msg-send-btn" id="sendButton" disabled title="Envoyer">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
+
+            {{ form_end(form) }}
         </div>
-    </div>
-    
-    <!-- Modal d'informations utilisateur -->
-    <div class="modal fade" id="userInfoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Informations sur {{ destinataire.prenom }} {{ destinataire.nom }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+    </section>
+</div>
+
+<!-- Modal nouveau message -->
+<div class="modal fade" id="newMessageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+        <div class="modal-content" style="border-radius:var(--radius-lg); overflow:hidden;">
+            <div class="msg-modal-header">
+                <h5 style="font-size:0.9375rem;font-weight:600;color:white;margin:0;"><i class="fas fa-edit me-2"></i>Nouveau message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body" style="padding:1.25rem;">
+                <div style="position:relative; margin-bottom:1rem;">
+                    <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--clr-text-light);font-size:0.78rem;"></i>
+                    <input type="text" id="destinataireSearch" class="form-control"
+                           style="padding-left:2.25rem; border-radius:100px; font-size:0.875rem;"
+                           placeholder="Rechercher un utilisateur...">
                 </div>
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <div class="mx-auto" style="width: 120px; height: 120px; overflow: hidden; border-radius: 50%;">
-                            {% if destinataire.photo %}
-                                <img src="{{ asset('uploads/photos/' ~ destinataire.photo) }}" alt="{{ destinataire.prenom }}" style="width: 100%; height: 100%; object-fit: cover;">
-                            {% else %}
-                                <div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                                    <i class="fas fa-user fa-4x text-white"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <h4 class="mt-3">{{ destinataire.prenom }} {{ destinataire.nom }}</h4>
-                        <p class="text-muted">{{ destinataire.email }}</p>
-                    </div>
-                    
-                    <div class="user-info-details">
-                        {% if destinataire.telephone %}
-                            <div class="user-info-item">
-                                <i class="fas fa-phone-alt me-2 text-primary"></i>
-                                <span>{{ destinataire.telephone }}</span>
-                            </div>
-                        {% endif %}
-                        
-                        {% if destinataire.dernierLogin %}
-                            <div class="user-info-item">
-                                <i class="fas fa-clock me-2 text-primary"></i>
-                                <span>Dernière connexion: {{ destinataire.dernierLogin|date('d/m/Y H:i') }}</span>
-                            </div>
-                        {% endif %}
-                        
-                        {% if is_granted('ROLE_FORMATEUR') and destinataire.biographie %}
-                            <div class="user-info-item">
-                                <i class="fas fa-info-circle me-2 text-primary"></i>
-                                <div>
-                                    <strong>Biographie</strong>
-                                    <p>{{ destinataire.biographie }}</p>
-                                </div>
-                            </div>
-                        {% endif %}
-                        
-                        <div class="user-info-item">
-                            <i class="fas fa-user-tag me-2 text-primary"></i>
-                            <span>Rôle: 
-                                {% for role in destinataire.roles %}
-                                    {% if role != 'ROLE_USER' %}
-                                        {{ role|replace({'ROLE_': ''}) }}
-                                    {% else %}
-                                        Utilisateur
-                                    {% endif %}
-                                {% endfor %}
-                            </span>
-                        </div>
-                    </div>
+                <div id="searchStatus" class="search-loading d-none">
+                    <div class="search-spinner"></div>
+                    <span>Recherche...</span>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                </div>
+                <div class="user-search-results"></div>
             </div>
         </div>
     </div>
-    </div>
-        </div>
-        </div>
-    </div>
-    <script>
-    // Force le bouton d'envoi à être actif dès le chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        // Récupérer les éléments
-        const sendButton = document.getElementById('send-button');
-        const messageInput = document.getElementById('message-input');
-        
-        // Activer le bouton d'envoi
-        if (sendButton) {
-            sendButton.disabled = false;
-        }
-        
-        // Réactiver le bouton à chaque saisie
-        if (messageInput) {
-            messageInput.addEventListener('input', function() {
-                sendButton.disabled = false;
-            });
-        }
-    });
-</script>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const messageInput = document.getElementById('message-input');
-            const sendButton = document.getElementById('send-button');
-            const chatMessages = document.getElementById('chatMessages');
-            const fileInput = document.getElementById('{{ form.pieceJointe.vars.id }}');
-            const attachmentPreview = document.getElementById('attachment-preview');
-            const attachmentName = document.querySelector('.attachment-name');
-            const attachmentSize = document.querySelector('.attachment-size');
-            const removeAttachment = document.getElementById('remove-attachment');
-            
-            // Activer initialement le bouton si le champ n'est pas vide
-            if (messageInput && messageInput.value.trim() !== '') {
-                sendButton.disabled = false;
-            }
-            
-            // Faire défiler jusqu'au dernier message
-            scrollToBottom();
-            
-            // Activer/désactiver le bouton d'envoi en fonction du contenu
-            if (messageInput) {
-                messageInput.addEventListener('input', function() {
-                    sendButton.disabled = this.value.trim() === '' && (!fileInput || !fileInput.files.length);
-                    
-                    // Ajuster automatiquement la hauteur du textarea
-                    this.style.height = 'auto';
-                    this.style.height = (this.scrollHeight) + 'px';
-                });
-                
-                // S'assurer que l'état initial du bouton est correct
-                sendButton.disabled = messageInput.value.trim() === '' && (!fileInput || !fileInput.files.length);
-            }
-            
-            // Envoyer le message avec la touche Entrée (sauf si Shift est pressé)
-            if (messageInput) {
-                messageInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!sendButton.disabled) {
-                            document.getElementById('message-form').submit();
-                        }
-                    }
-                });
-            }
-            
-            // Gérer l'aperçu des pièces jointes
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    if (this.files.length) {
-                        const file = this.files[0];
-                        attachmentName.textContent = file.name;
-                        attachmentSize.textContent = formatFileSize(file.size);
-                        attachmentPreview.style.display = 'flex';
-                        sendButton.disabled = false;
-                    } else {
-                        attachmentPreview.style.display = 'none';
-                        sendButton.disabled = messageInput.value.trim() === '';
-                    }
-                });
-            }
-            
-            // Supprimer la pièce jointe
-            if (removeAttachment) {
-                removeAttachment.addEventListener('click', function() {
-                    fileInput.value = '';
-                    attachmentPreview.style.display = 'none';
-                    sendButton.disabled = messageInput.value.trim() === '';
-                });
-            }
-            
-            // Recherche d'utilisateurs pour nouveau message
-            const destinataireSearch = document.getElementById('destinataireSearch');
-            const searchResults = document.querySelector('.user-search-results');
-            
-            if (destinataireSearch) {
-                let searchTimeout;
-                
-                destinataireSearch.addEventListener('input', function() {
-                    clearTimeout(searchTimeout);
-                    const searchTerm = this.value.trim();
-                    
-                    if (searchTerm.length < 2) {
-                        searchResults.innerHTML = '';
-                        return;
-                    }
-                    
-                    searchTimeout = setTimeout(() => {
-                        fetch(`{{ path('messagerie_rechercher_utilisateurs') }}?q=${searchTerm}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                searchResults.innerHTML = '';
-                                
-                                if (data.length === 0) {
-                                    searchResults.innerHTML = `
-                                        <div class="text-center py-3 text-muted">
-                                            <i class="fas fa-search me-2"></i>Aucun utilisateur trouvé
-                                        </div>
-                                    `;
-                                    return;
-                                }
-                                
-                                data.forEach(user => {
-                                    const userElement = document.createElement('div');
-                                    userElement.className = 'user-search-item';
-                                    userElement.innerHTML = `
-                                        <div class="user-search-avatar">
-                                            ${user.photo 
-                                                ? `<img src="{{ asset('uploads/photos/') }}/${user.photo}" alt="${user.text}">`
-                                                : `<div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                                                    <i class="fas fa-user text-white"></i>
-                                                  </div>`
-                                            }
-                                        </div>
-                                        <div class="user-search-info">
-                                            <div class="user-search-name">${user.text}</div>
-                                            <div class="user-search-email">${user.email}</div>
-                                        </div>
-                                    `;
-                                    
-                                    userElement.addEventListener('click', function() {
-                                        window.location.href = `{{ path('messagerie_conversation', {'id': 'USER_ID'}) }}`.replace('USER_ID', user.id);
-                                    });
-                                    
-                                    searchResults.appendChild(userElement);
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Erreur lors de la recherche:', error);
-                                searchResults.innerHTML = `
-                                    <div class="text-center py-3 text-danger">
-                                        <i class="fas fa-exclamation-circle me-2"></i>Erreur lors de la recherche
-                                    </div>
-                                `;
-                            });
-                    }, 300);
-                });
-            }
-            
-            // Rafraîchir les nouveaux messages toutes les 5 secondes
-            let lastMessageId = getLastMessageId();
-            
-            setInterval(function() {
-                checkNewMessages();
-            }, 5000);
-            
-            function checkNewMessages() {
-                const currentLastMessageId = getLastMessageId();
-                
-                if (currentLastMessageId > 0) {
-                    fetch(`{{ path('messagerie_nouveaux_messages', {'id': destinataire.id}) }}?lastId=${currentLastMessageId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.messages && data.messages.length > 0) {
-                                let currentDate = getCurrentDateFromDivider();
-                                
-                                data.messages.forEach(message => {
-                                    const messageDate = new Date(message.dateEnvoi).toISOString().split('T')[0];
-                                    
-                                    if (currentDate !== messageDate) {
-                                        const today = new Date().toISOString().split('T')[0];
-                                        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                                        
-                                        let dateText;
-                                        if (messageDate === today) {
-                                            dateText = 'Aujourd\'hui';
-                                        } else if (messageDate === yesterday) {
-                                            dateText = 'Hier';
-                                        } else {
-                                            const parts = messageDate.split('-');
-                                            dateText = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                                        }
-                                        
-                                        const dateDivider = document.createElement('div');
-                                        dateDivider.className = 'message-date-divider';
-                                        dateDivider.textContent = dateText;
-                                        chatMessages.appendChild(dateDivider);
-                                        
-                                        currentDate = messageDate;
-                                    }
-                                    
-                                    const messageGroup = document.createElement('div');
-                                    messageGroup.className = `message-group ${message.estExpediteur ? 'sent' : 'received'}`;
-                                    messageGroup.dataset.messageId = message.id;
-                                    
-                                    messageGroup.innerHTML = `
-                                        <div class="message-bubble">
-                                            ${message.contenu.replace(/\n/g, '<br>')}
-                                        </div>
-                                        <div class="message-time">
-                                            ${message.dateEnvoi}
-                                            ${message.estExpediteur ? '<i class="fas fa-check ms-1" title="Envoyé"></i>' : ''}
-                                        </div>
-                                    `;
-                                    
-                                    chatMessages.appendChild(messageGroup);
-                                });
-                                
-                                scrollToBottom();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur lors de la vérification des nouveaux messages:', error);
-                        });
-                }
-            }
-            
-            function getLastMessageId() {
-                const messageElements = document.querySelectorAll('.message-group');
-                if (messageElements.length > 0) {
-                    const lastElement = messageElements[messageElements.length - 1];
-                    return parseInt(lastElement.dataset.messageId || 0);
-                }
-                return 0;
-            }
-            
-            function getCurrentDateFromDivider() {
-                const dividers = document.querySelectorAll('.message-date-divider');
-                if (dividers.length > 0) {
-                    const lastDivider = dividers[dividers.length - 1];
-                    const dividerText = lastDivider.textContent.trim();
-                    
-                    const today = new Date();
-                    const yesterday = new Date(Date.now() - 86400000);
-                    
-                    if (dividerText === 'Aujourd\'hui') {
-                        return today.toISOString().split('T')[0];
-                    } else if (dividerText === 'Hier') {
-                        return yesterday.toISOString().split('T')[0];
-                    } else {
-                        // Format: dd/mm/yyyy
-                        const parts = dividerText.split('/');
-                        return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
-                }
-                return null;
-            }
-            
-            function scrollToBottom() {
-                if (chatMessages) {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-            }
-            
-            function formatFileSize(bytes) {
-                if (bytes < 1024) {
-                    return bytes + ' octets';
-                } else if (bytes < 1048576) {
-                    return (bytes / 1024).toFixed(1) + ' Ko';
-                } else {
-                    return (bytes / 1048576).toFixed(1) + ' Mo';
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ─── Scroll en bas ───────────────────────────────────
+    function scrollToBottom() {
+        const feed = document.getElementById('messagesFeed');
+        if (feed) feed.scrollTop = feed.scrollHeight;
+    }
+    scrollToBottom();
+
+    // ─── Textarea auto-resize ────────────────────────────
+    const textarea = document.getElementById('messageContent');
+    const sendBtn  = document.getElementById('sendButton');
+    const fileInput = document.querySelector('input[type="file"]');
+
+    function updateSendBtn() {
+        const hasText = textarea && textarea.value.trim().length > 0;
+        const hasFile = fileInput && fileInput.files.length > 0;
+        if (sendBtn) sendBtn.disabled = !(hasText || hasFile);
+    }
+
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+            updateSendBtn();
+        });
+
+        // Entrée = envoyer, Shift+Entrée = saut de ligne
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.disabled) {
+                    document.getElementById('messageForm').submit();
                 }
             }
         });
-    </script>
+    }
+
+    // ─── Pièce jointe ────────────────────────────────────
+    const attachPreview = document.getElementById('attachmentPreview');
+    const attachName    = document.getElementById('attachmentName');
+    const attachSize    = document.getElementById('attachmentSize');
+    const removeBtn     = document.getElementById('removeAttachment');
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' o';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' Ko';
+        return (bytes / 1048576).toFixed(1) + ' Mo';
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const f = this.files[0];
+                attachName.textContent = f.name;
+                attachSize.textContent = formatSize(f.size);
+                attachPreview.style.display = 'flex';
+                updateSendBtn();
+            }
+        });
+    }
+
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            if (fileInput) fileInput.value = '';
+            attachPreview.style.display = 'none';
+            attachName.textContent = '';
+            attachSize.textContent = '';
+            updateSendBtn();
+        });
+    }
+
+    // ─── Recherche conversations (sidebar) ───────────────
+    const convSearch = document.getElementById('conversationSearch');
+    if (convSearch) {
+        convSearch.addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            document.querySelectorAll('.msg-conv-item').forEach(item => {
+                const name = item.querySelector('.msg-conv-name')?.textContent.toLowerCase() || '';
+                const preview = item.querySelector('.msg-conv-preview')?.textContent.toLowerCase() || '';
+                item.style.display = (name.includes(term) || preview.includes(term)) ? 'flex' : 'none';
+            });
+        });
+    }
+
+    // ─── Recherche destinataire (modal) ──────────────────
+    const destSearch  = document.getElementById('destinataireSearch');
+    const searchResults = document.querySelector('.user-search-results');
+    const searchStatus  = document.getElementById('searchStatus');
+    let searchTimeout;
+
+    if (destSearch) {
+        destSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const term = this.value.trim();
+            if (term.length < 2) { searchResults.innerHTML = ''; return; }
+            searchStatus.classList.remove('d-none');
+            searchResults.innerHTML = '';
+            searchTimeout = setTimeout(() => {
+                fetch(`{{ path('messagerie_rechercher_utilisateurs') }}?q=${encodeURIComponent(term)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        searchStatus.classList.add('d-none');
+                        if (!data.length) {
+                            searchResults.innerHTML = `<div class="search-empty-state"><i class="fas fa-search"></i><p>Aucun résultat pour "${term}"</p></div>`;
+                            return;
+                        }
+                        searchResults.innerHTML = '';
+                        data.forEach(user => {
+                            const initials = user.text.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+                            const el = document.createElement('div');
+                            el.className = 'user-search-item';
+                            el.innerHTML = `
+                                <div class="msg-avatar">${user.photo
+                                    ? `<img src="{{ asset('uploads/photos/') }}/${user.photo}" alt="${user.text}">`
+                                    : initials}</div>
+                                <div class="user-search-info">
+                                    <div class="user-search-name">${user.text}</div>
+                                    <div class="user-search-email">${user.email}</div>
+                                </div>
+                                <div class="user-search-action"><i class="fas fa-arrow-right"></i></div>`;
+                            el.addEventListener('click', () => {
+                                window.location.href = `{{ path('messagerie_conversation', {'id': 'USER_ID'}) }}`.replace('USER_ID', user.id);
+                            });
+                            searchResults.appendChild(el);
+                        });
+                    })
+                    .catch(() => {
+                        searchStatus.classList.add('d-none');
+                        searchResults.innerHTML = `<div class="search-empty-state" style="color:var(--clr-danger);"><i class="fas fa-exclamation-circle"></i><p>Erreur lors de la recherche</p></div>`;
+                    });
+            }, 300);
+        });
+
+        document.getElementById('newMessageModal').addEventListener('shown.bs.modal', () => destSearch.focus());
+        document.getElementById('newMessageModal').addEventListener('hidden.bs.modal', () => {
+            destSearch.value = '';
+            searchResults.innerHTML = '';
+            searchStatus.classList.add('d-none');
+        });
+    }
+
+    // ─── Auto-refresh des messages ───────────────────────
+    function getLastMessageId() {
+        const rows = document.querySelectorAll('.msg-row[data-message-id]');
+        if (!rows.length) return 0;
+        return parseInt(rows[rows.length - 1].dataset.messageId) || 0;
+    }
+
+    function addMessageToFeed(msg) {
+        const feed = document.getElementById('messagesFeed');
+        const isSent = msg.isSent;
+
+        // Divider de date si besoin
+        const lastDivider = feed.querySelector('.msg-date-divider:last-of-type span');
+        if (!lastDivider || lastDivider.textContent !== msg.dateLabel) {
+            const div = document.createElement('div');
+            div.className = 'msg-date-divider';
+            div.innerHTML = `<span>${msg.dateLabel}</span>`;
+            feed.appendChild(div);
+        }
+
+        const row = document.createElement('div');
+        row.className = `msg-row ${isSent ? 'sent' : 'received'}`;
+        row.dataset.messageId = msg.id;
+
+        let avatarHtml = '';
+        if (!isSent) {
+            avatarHtml = `<div class="msg-avatar">{{ destinataire.prenom|first|upper }}{{ destinataire.nom|first|upper }}</div>`;
+        }
+
+        let attachHtml = '';
+        if (msg.pieceJointe) {
+            attachHtml = `<a href="/uploads/messages/${msg.pieceJointe}" class="msg-attachment" target="_blank">
+                <i class="fas fa-paperclip"></i><span>${msg.pieceJointe}</span></a>`;
+        }
+
+        row.innerHTML = `${avatarHtml}
+            <div>
+                <div class="msg-bubble ${isSent ? 'sent' : 'received'}">${msg.contenu}${attachHtml}</div>
+                <div class="msg-meta">${msg.heure}</div>
+            </div>`;
+
+        feed.appendChild(row);
+        scrollToBottom();
+    }
+
+    setInterval(() => {
+        const lastId = getLastMessageId();
+        fetch(`{{ path('messagerie_nouveaux_messages', {'id': destinataire.id}) }}?lastId=${lastId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.length) {
+                    data.forEach(msg => addMessageToFeed(msg));
+                }
+            })
+            .catch(() => {});
+    }, 5000);
+});
+</script>
 {% endblock %}

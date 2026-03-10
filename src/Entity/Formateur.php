@@ -3,18 +3,26 @@
 namespace App\Entity;
 
 use App\Repository\FormateurRepository;
-use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FormateurRepository::class)]
 class Formateur extends Utilisateur
 {
+    #[ORM\OneToMany(mappedBy: 'formateur', targetEntity: Formation::class)]
+    private Collection $formationsAnimees;
+
     public function __construct()
     {
-        // Appel du constructeur parent pour initialiser toutes les propriétés
         parent::__construct();
-        
-        // S'assurer que badges est bien initialisé
         $this->badges = [];
+        $this->formationsAnimees = new ArrayCollection();
+    }
+
+    /** @return Collection<int, Formation> */
+    public function getFormationsAnimees(): Collection
+    {
+        return $this->formationsAnimees;
     }
 }

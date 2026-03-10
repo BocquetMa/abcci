@@ -1,76 +1,145 @@
-{# templates/inscription/formateur/en_attente.html.twig #}
 {% extends 'base.html.twig' %}
-
-{% block title %}Inscriptions en attente - {{ parent() }}{% endblock %}
+{% block title %}Mes inscriptions - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    <div class="row">
+<div class="container" style="max-width:1100px; padding:2rem 1.5rem;">
+    <div class="row g-4">
         <div class="col-md-3">
-            {% include 'formateur/_sidebar.html.twig' with {active: 'inscriptions_attente'} %}
+            {% include 'profil/_sidebar.html.twig' with {active: 'inscriptions'} %}
         </div>
         <div class="col-md-9">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Inscriptions en attente</h2>
-                    <a href="{{ path('inscription_formateur_liste') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-list me-1"></i>Toutes les inscriptions
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% if inscriptions_en_attente|length > 0 or inscriptions_acceptees|length > 0 or inscriptions_refusees|length > 0 or inscriptions_terminees|length > 0 %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Formation</th>
-                                        <th>Participant</th>
-                                        <th>Date de demande</th>
-                                        <th>Places disponibles</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for inscription in inscriptions %}
-                                        <tr>
-                                            <td>
-                                                <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}" class="text-decoration-none">
-                                                    {{ inscription.formation.titre }}
-                                                </a>
-                                            </td>
-                                            <td>{{ inscription.utilisateur.prenom }} {{ inscription.utilisateur.nom }}</td>
-                                            <td>{{ inscription.dateInscription|date('d/m/Y H:i') }}</td>
-                                            <td>
-                                                {% if inscription.formation.placesDisponibles > 0 %}
-                                                    <span class="badge bg-success">{{ inscription.formation.placesDisponibles }} places</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Complet</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ path('inscription_valider', {id: inscription.id}) }}" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-check me-1"></i>Traiter
-                                                    </a>
-                                                    <a href="{{ path('inscription_details', {id: inscription.id}) }}" class="btn btn-sm btn-outline-info">
-                                                        <i class="fas fa-info-circle"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm);">
+                <h2 style="font-size:1rem; font-weight:700; color:var(--clr-text); margin:0 0 1.5rem;">
+                    <i class="fas fa-clipboard-list me-2" style="color:var(--clr-primary);"></i>Mes inscriptions
+                </h2>
+
+                {% if inscriptions|length == 0 %}
+                    <div style="text-align:center; padding:3rem 1rem; color:var(--clr-text-muted);">
+                        <i class="fas fa-clipboard-list" style="font-size:2.5rem; opacity:0.2; display:block; margin-bottom:1rem;"></i>
+                        <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucune inscription</p>
+                        <p style="font-size:0.85rem; margin-bottom:1.5rem;">Vous n'êtes inscrit(e) à aucune formation pour le moment.</p>
+                        <a href="{{ path('formation_lister') }}" class="btn btn-primary btn-sm">Voir les formations</a>
+                    </div>
+                {% else %}
+
+                    {% if inscriptions_en_attente is defined and inscriptions_en_attente|length > 0 %}
+                    <div class="mb-4">
+                        <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span style="background:#FEF3C7; color:#92400E; font-size:0.72rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">{{ inscriptions_en_attente|length }}</span>
+                            En attente de validation
+                        </h3>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {% for inscription in inscriptions_en_attente %}
+                            <div style="background:var(--clr-bg); border:1px solid #FDE68A; border-left:3px solid #F59E0B; border-radius:var(--radius); padding:0.875rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                                <div>
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}"
+                                       style="font-size:0.875rem; font-weight:600; color:var(--clr-text); text-decoration:none;">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                    <div style="font-size:0.775rem; color:var(--clr-text-muted); margin-top:0.2rem;">
+                                        <i class="fas fa-calendar me-1"></i>Demandé le {{ inscription.dateInscription|date('d/m/Y') }}
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span style="background:#FEF3C7; color:#92400E; font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px;">En attente</span>
+                                    <a href="{{ path('inscription_annuler', {id: inscription.id}) }}"
+                                       onclick="return confirm('Annuler cette demande ?')"
+                                       style="font-size:0.78rem; color:#DC2626; font-weight:500; text-decoration:none; white-space:nowrap;">
+                                        <i class="fas fa-times me-1"></i>Annuler
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Aucune inscription en attente pour vos formations.
-                            </p>
-                        </div>
+                    </div>
                     {% endif %}
-                </div>
+
+                    {% if inscriptions_acceptees is defined and inscriptions_acceptees|length > 0 %}
+                    <div class="mb-4">
+                        <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.72rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">{{ inscriptions_acceptees|length }}</span>
+                            Formations en cours
+                        </h3>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {% for inscription in inscriptions_acceptees %}
+                            <div style="background:var(--clr-bg); border:1px solid var(--clr-border); border-left:3px solid var(--clr-primary); border-radius:var(--radius); padding:0.875rem 1.25rem;">
+                                <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}"
+                                       style="font-size:0.875rem; font-weight:600; color:var(--clr-text); text-decoration:none;">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                    <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px; white-space:nowrap;">Acceptée</span>
+                                </div>
+                                <div style="font-size:0.775rem; color:var(--clr-text-muted); display:flex; gap:1rem; flex-wrap:wrap;">
+                                    {% if inscription.formation.dateDebut is defined and inscription.formation.dateDebut %}
+                                        <span><i class="fas fa-calendar me-1"></i>{{ inscription.formation.dateDebut|date('d/m/Y') }} → {{ inscription.formation.dateFin|date('d/m/Y') }}</span>
+                                    {% endif %}
+                                    {% if inscription.formation.formateur is defined and inscription.formation.formateur %}
+                                        <span><i class="fas fa-user-tie me-1"></i>{{ inscription.formation.formateur.prenom }} {{ inscription.formation.formateur.nom }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if inscriptions_terminees is defined and inscriptions_terminees|length > 0 %}
+                    <div class="mb-4">
+                        <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span style="background:#EDE9FE; color:#5B21B6; font-size:0.72rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">{{ inscriptions_terminees|length }}</span>
+                            Formations terminées
+                        </h3>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {% for inscription in inscriptions_terminees %}
+                            <div style="background:var(--clr-bg); border:1px solid var(--clr-border); border-left:3px solid #7C3AED; border-radius:var(--radius); padding:0.875rem 1.25rem;">
+                                <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}"
+                                       style="font-size:0.875rem; font-weight:600; color:var(--clr-text); text-decoration:none;">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                    <span style="background:#EDE9FE; color:#5B21B6; font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px; white-space:nowrap;">Terminée</span>
+                                </div>
+                                <div style="font-size:0.775rem; color:var(--clr-text-muted); display:flex; gap:1rem; flex-wrap:wrap;">
+                                    {% if inscription.formation.dateFin is defined and inscription.formation.dateFin %}
+                                        <span><i class="fas fa-calendar-check me-1"></i>Terminée le {{ inscription.formation.dateFin|date('d/m/Y') }}</span>
+                                    {% endif %}
+                                    {% if inscription.formation.formateur is defined and inscription.formation.formateur %}
+                                        <span><i class="fas fa-user-tie me-1"></i>{{ inscription.formation.formateur.prenom }} {{ inscription.formation.formateur.nom }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if inscriptions_refusees is defined and inscriptions_refusees|length > 0 %}
+                    <div>
+                        <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span style="background:#FEE2E2; color:#991B1B; font-size:0.72rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">{{ inscriptions_refusees|length }}</span>
+                            Demandes refusées
+                        </h3>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {% for inscription in inscriptions_refusees %}
+                            <div style="background:var(--clr-bg); border:1px solid #FECACA; border-left:3px solid #DC2626; border-radius:var(--radius); padding:0.875rem 1.25rem;">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <a href="{{ path('formation_voir', {id: inscription.formation.id}) }}"
+                                       style="font-size:0.875rem; font-weight:600; color:var(--clr-text); text-decoration:none;">
+                                        {{ inscription.formation.titre }}
+                                    </a>
+                                    <span style="background:#FEE2E2; color:#991B1B; font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px; white-space:nowrap;">Refusée</span>
+                                </div>
+                                <div style="font-size:0.775rem; color:var(--clr-text-muted); margin-top:0.2rem;">
+                                    <i class="fas fa-calendar me-1"></i>Demandé le {{ inscription.dateInscription|date('d/m/Y') }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                {% endif %}
             </div>
         </div>
     </div>

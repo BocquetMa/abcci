@@ -55,21 +55,13 @@ class FormationSearchType extends AbstractType
             ])
             ->add('prixMin', NumberType::class, [
                 'required' => false,
-                'mapped' => false,
                 'label' => 'Prix minimum (€)',
-                'attr' => [
-                    'min' => 0,
-                    'placeholder' => 'Min'
-                ]
+                'attr' => ['min' => 0, 'placeholder' => 'Min']
             ])
             ->add('prixMax', NumberType::class, [
                 'required' => false,
-                'mapped' => false,
                 'label' => 'Prix maximum (€)',
-                'attr' => [
-                    'min' => 0,
-                    'placeholder' => 'Max'
-                ]
+                'attr' => ['min' => 0, 'placeholder' => 'Max']
             ])
             ->add('motsCles', EntityType::class, [
                 'class' => MotCle::class,

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(symfony server:status 2>&1)",
+      "Bash(netstat -ano 2>/dev/null | grep \":3306\" | head -3 || echo \"MySQL probablement arrêté\")",
+      "Bash(/c/xampp/php/php.exe composer-setup.php --install-dir=/c/xampp/php --filename=composer 2>&1)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe --user=root --password=\"\" abcciNais -e \"DESCRIBE formation;\" 2>&1)",
+      "Bash(php bin/console doctrine:query:sql \"SELECT id, email, roles, nom, prenom FROM utilisateur LIMIT 20\" 2>&1)",
+      "Bash(where php:*)",
+      "Read(//c/xampp/php/**)",
+      "Read(//c/wamp64/bin/**)",
+      "Bash(find /c -name php.exe -maxdepth 5)",
+      "Bash(/c/xampp/php/php.exe bin/console doctrine:query:sql \"SELECT id, email, roles, nom, prenom FROM utilisateur LIMIT 20\" 2>&1)",
+      "Read(//c/xampp/**)",
+      "Bash(./xampp_start.exe)",
+      "Bash(net start:*)",
+      "Bash(/c/xampp/php/php.exe bin/console security:hash-password \"Abcci2024!\" 2>&1)",
+      "Bash(/c/xampp/php/php.exe bin/console doctrine:query:sql \"UPDATE utilisateur SET password = '\\\\$2y\\\\$13\\\\$O25lugD7MUUoy8c8F03arOCJQRfglnEdZbdUXVdt1RTZHgRFIDPZe', is_verified = 1 WHERE email IN \\('admin@abcci.fr', 'formateur@abcci.fr', 'utilisateur@abcci.fr'\\)\" 2>&1)",
+      "Bash(/c/xampp/php/php.exe reset_passwords.php 2>&1)",
+      "Bash(/c/xampp/php/php.exe bin/console security:hash-password \"Abcci2024!\" --no-interaction)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root abcciNais -e \"SELECT u.id, u.email, u.roles, u.type FROM utilisateur u WHERE u.email IN \\('admin@abcci.fr', 'formateur@abcci.fr', 'utilisateur@abcci.fr'\\);\" 2>&1)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root abcciNais -e \"SHOW COLUMNS FROM formation;\" 2>&1)",
+      "Bash(/c/xampp/php/php.exe bin/console debug:router 2>&1 | grep -E \"profil|notification|admin_utilisateur_profile\" | head -20)",
+      "Bash(/c/xampp/php/php.exe bin/console debug:router 2>&1 | grep \"admin_utilisateur_profile\")",
+      "Bash(/c/xampp/php/php.exe bin/console cache:clear 2>&1 | tail -5)",
+      "Bash(/c/xampp/php/php.exe bin/console debug:container --show-arguments 2>&1 | grep -i \"SocialLinkType\\\\|ProfileType\" | head -5)",
+      "Bash(/c/xampp/php/php.exe bin/console cache:clear 2>&1 | tail -3)",
+      "Bash(/c/xampp/php/php.exe bin/console cache:clear 2>&1 | tail -2)",
+      "Bash(/c/xampp/php/php.exe bin/console debug:router 2>&1 | grep messagerie)",
+      "Bash(/c/xampp/php/php.exe bin/console cache:clear 2>&1 | tail -2 && /c/xampp/php/php.exe bin/console lint:twig templates/base.html.twig 2>&1 | tail -3)"
+    ]
+  }
+}

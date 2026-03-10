@@ -1,117 +1,162 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription{% endblock %}
+{% block title %}Créer un compte - ABCCI{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .register-container {
-            max-width: 600px;
-            margin: 2rem auto;
+        body { background: #f6f6f6; }
+        .register-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
-        .card-header {
-            background-color: #28a745;
-            color: white;
+        .register-brand {
+            text-align: center;
+            margin-bottom: 2rem;
         }
-        .required:after {
-            content: " *";
-            color: red;
+        .register-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #003189;
+            margin-bottom: 0.25rem;
+        }
+        .register-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 2px 6px rgba(0,0,18,0.06);
+        }
+        .register-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .register-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .register-footer a {
+            color: #003189;
+            font-weight: 600;
+        }
+        /* Rendre les erreurs Symfony compatibles DSFR */
+        .form-error-message, ul.form-errors {
+            color: #ce0500;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            list-style: none;
+            padding: 0;
         }
     </style>
 {% endblock %}
 
 {% block body %}
-<div class="container register-container">
-    <div class="card shadow">
-        <div class="card-header">
-            <h3 class="text-center mb-0">Créer un compte</h3>
-        </div>
-        <div class="card-body">
-            {% for flash_error in app.flashes('verify_email_error') %}
-                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-            {% endfor %}
+<div class="register-page">
+    <div class="register-brand">
+        <p class="fr-logo">République<br>Française</p>
+        <h1>ABCCI Formation</h1>
+        <p style="color:#666; font-size:0.9rem; margin:0;">Centre de formation professionnelle</p>
+    </div>
 
-            {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'required'}}) }}
-                            {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(registrationForm.nom) }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'required'}}) }}
-                            {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(registrationForm.prenom) }}
-                        </div>
+    <div class="register-card">
+        <h2>Créer un compte</h2>
+
+        {% for flash_error in app.flashes('verify_email_error') %}
+            <div class="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
+                <p>{{ flash_error }}</p>
+            </div>
+        {% endfor %}
+
+        {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="fr-input-group">
+                        {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'fr-label'}}) }}
+                        {{ form_widget(registrationForm.nom, {'attr': {'class': 'fr-input'}}) }}
+                        {{ form_errors(registrationForm.nom) }}
                     </div>
                 </div>
-
-                <div class="form-group mb-3">
-                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'required'}}) }}
-                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(registrationForm.email) }}
-                </div>
-
-                <div class="form-group mb-3">
-                    {{ form_label(registrationForm.telephone) }}
-                    {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
-                    {{ form_errors(registrationForm.telephone) }}
-                </div>
-
-                <div class="form-group mb-3">
-                    {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'required'}}) }}
-                    {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
-                    <div class="form-text">
-                        Le mot de passe doit contenir au moins 8 caractères, une majuscule, 
-                        une minuscule et un chiffre.
+                <div class="col-md-6">
+                    <div class="fr-input-group">
+                        {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'fr-label'}}) }}
+                        {{ form_widget(registrationForm.prenom, {'attr': {'class': 'fr-input'}}) }}
+                        {{ form_errors(registrationForm.prenom) }}
                     </div>
-                    {{ form_errors(registrationForm.plainPassword) }}
                 </div>
+            </div>
 
-                {% if registrationForm.agreeTerms is defined %}
-                    <div class="form-check mb-3">
-                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
-                        {{ form_label(registrationForm.agreeTerms, 'J\'accepte les conditions d\'utilisation', {'label_attr': {'class': 'form-check-label'}}) }}
-                        {{ form_errors(registrationForm.agreeTerms) }}
+            <div class="fr-input-group">
+                {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'fr-label'}}) }}
+                {{ form_widget(registrationForm.email, {'attr': {'class': 'fr-input', 'autocomplete': 'email'}}) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="fr-input-group">
+                {{ form_label(registrationForm.telephone, null, {'label_attr': {'class': 'fr-label'}}) }}
+                {{ form_widget(registrationForm.telephone, {'attr': {'class': 'fr-input', 'autocomplete': 'tel'}}) }}
+                {{ form_errors(registrationForm.telephone) }}
+            </div>
+
+            <div class="fr-input-group">
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'fr-label'}}) }}
+                <div class="fr-password" id="register-password-input">
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'fr-password__input fr-input', 'autocomplete': 'new-password'}}) }}
+                    <div class="fr-password__checkbox fr-checkbox-group fr-checkbox-group--sm">
+                        <input aria-label="Afficher le mot de passe" id="toggle-reg-password" type="checkbox">
+                        <label class="fr-password__checkbox fr-label" for="toggle-reg-password">Afficher</label>
                     </div>
-                {% endif %}
+                </div>
+                <p class="fr-hint-text">Au moins 8 caractères, une majuscule, une minuscule et un chiffre.</p>
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
 
-                <button type="submit" class="btn btn-success w-100">
-                    <i class="fas fa-user-plus me-2"></i>S'inscrire
-                </button>
-            {{ form_end(registrationForm) }}
-        </div>
-        <div class="card-footer text-center">
-            <p class="mb-0">
-                Vous avez déjà un compte ? 
-                <a href="{{ path('app_login') }}" class="text-decoration-none">
-                    <i class="fas fa-sign-in-alt me-1"></i>Connectez-vous
-                </a>
-            </p>
-        </div>
+            {% if registrationForm.agreeTerms is defined %}
+                <div class="fr-checkbox-group fr-mb-2w">
+                    {{ form_widget(registrationForm.agreeTerms) }}
+                    {{ form_label(registrationForm.agreeTerms, "J'accepte les conditions d'utilisation", {'label_attr': {'class': 'fr-label'}}) }}
+                    {{ form_errors(registrationForm.agreeTerms) }}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="fr-btn w-100 fr-mt-1w" style="justify-content:center;">
+                <span class="fr-icon-user-add-line me-1" aria-hidden="true"></span>
+                Créer mon compte
+            </button>
+        {{ form_end(registrationForm) }}
+    </div>
+
+    <div class="register-footer">
+        Vous avez déjà un compte ?
+        <a href="{{ path('app_login') }}">Se connecter</a>
     </div>
 </div>
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        // Validation côté client
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
-    </script>
+{{ parent() }}
+<script>
+(function () {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    forms.forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+</script>
 {% endblock %}
 {% endblock %}

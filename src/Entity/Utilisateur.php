@@ -61,14 +61,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $biographieDetaillee = null;
 
     // Liens sociaux et profils
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
     private array $liensSociaux = [];
 
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
     private array $competences = [];
 
     // Badges et récompenses
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json', options: ['default' => '[]'])]
     private array $badges = [];
 
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
@@ -84,7 +84,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $dernierLogin = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json', options: ['default' => '{}'])]
     private array $statistiques = [];
 
     // Relations
@@ -102,7 +102,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $notifications;
 
     // Préférences
-    #[ORM\Column(type: 'json', nullable: true)]
+    #[ORM\Column(type: 'json')]
     private array $preferences = [
         'notifications_email' => true,
         'notifications_site' => true,

@@ -1,140 +1,189 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Connexion - ABCCI Formation{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .login-container {
-            max-width: 450px;
-            margin: 2rem auto;
+        body {
+            background-color: #f6f6f6;
         }
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
-        .card-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #4a69bb, #6E8BD6);
-            border-bottom: none;
+        .login-brand {
+            text-align: center;
+            margin-bottom: 2rem;
         }
-        .or-divider {
+        .login-brand .fr-logo {
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .login-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #003189;
+            margin-bottom: 0.25rem;
+        }
+        .login-brand p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 2px 6px rgba(0,0,18,0.06);
+        }
+        .login-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .divider-or {
             display: flex;
             align-items: center;
-            margin: 1.5rem 0;
+            margin: 1.25rem 0;
+            color: #666;
+            font-size: 0.85rem;
         }
-        .or-divider:before, .or-divider:after {
-            content: "";
+        .divider-or::before, .divider-or::after {
+            content: '';
             flex: 1;
-            border-bottom: 1px solid #dee2e6;
+            height: 1px;
+            background: #e5e5e5;
         }
-        .or-divider-text {
-            padding: 0 1rem;
-            color: #6c757d;
-            font-weight: 500;
+        .divider-or span {
+            padding: 0 0.75rem;
         }
-        .social-btn {
+        .google-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.5rem;
-            border-radius: 5px;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.65rem 1rem;
             border: 1px solid #ddd;
-            background-color: white;
+            border-radius: 4px;
+            background: white;
+            color: #1e1e1e;
+            font-size: 0.9rem;
             font-weight: 500;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
         }
-        .social-btn:hover {
-            background-color: #f8f9fa;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .google-btn:hover {
+            background: #f6f6f6;
+            border-color: #aaa;
+            color: #1e1e1e;
         }
-        .social-btn img {
-            height: 24px;
-            margin-right: 0.75rem;
+        .google-btn img {
+            width: 20px;
+            height: 20px;
         }
-        .google-btn {
-            color: #444;
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
         }
-        .form-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-top: 1rem;
+        .login-footer a {
+            color: #003189;
+            font-weight: 600;
         }
     </style>
 {% endblock %}
 
 {% block body %}
-<div class="login-container">
-    <div class="card">
-        <div class="card-header text-white text-center">
-            <h1 class="h3 mb-0">Connexion</h1>
-        </div>
-        <div class="card-body p-4">
-            {% if error %}
-                <div class="alert alert-danger">
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
-                </div>
-            {% endif %}
-            
-            <!-- Bouton de connexion Google -->
-            <a href="{{ path('connect_google_start') }}" class="btn social-btn google-btn w-100">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
-                Continuer avec Google
-            </a>
-            
-            <div class="or-divider">
-                <span class="or-divider-text">OU</span>
+<div class="login-page">
+    <div class="login-brand">
+        <p class="fr-logo">République<br>Française</p>
+        <h1>ABCCI Formation</h1>
+        <p>Centre de formation professionnelle</p>
+    </div>
+
+    <div class="login-card">
+        <h2>Se connecter</h2>
+
+        {% if error %}
+            <div class="fr-alert fr-alert--error fr-alert--sm fr-mb-2w" role="alert">
+                <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
             </div>
-            
-            <form method="post">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Adresse email</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input type="email" value="{{ last_username }}" name="email" id="email"
-                               class="form-control" required autofocus placeholder="votre@email.com">
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">Mot de passe</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                        <input type="password" name="password" id="password"
-                               class="form-control" required placeholder="••••••••">
-                    </div>
-                </div>
-                
-                <div class="form-footer">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="remember_me" name="_remember_me">
-                        <label class="form-check-label" for="remember_me">
-                            Se souvenir de moi
+        {% endif %}
+
+        <!-- Connexion Google -->
+        <a href="{{ path('connect_google_start') }}" class="google-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+            Continuer avec Google
+        </a>
+
+        <div class="divider-or"><span>ou</span></div>
+
+        <form method="post">
+            <div class="fr-input-group">
+                <label class="fr-label" for="email">
+                    Adresse email
+                </label>
+                <input class="fr-input"
+                       type="email"
+                       value="{{ last_username }}"
+                       name="email"
+                       id="email"
+                       autocomplete="email"
+                       required
+                       autofocus
+                       placeholder="votre@email.com">
+            </div>
+
+            <div class="fr-input-group">
+                <label class="fr-label" for="password">
+                    Mot de passe
+                </label>
+                <div class="fr-password" id="password-input">
+                    <input class="fr-password__input fr-input"
+                           autocomplete="current-password"
+                           type="password"
+                           name="password"
+                           id="password"
+                           required
+                           placeholder="••••••••">
+                    <div class="fr-password__checkbox fr-checkbox-group fr-checkbox-group--sm">
+                        <input aria-label="Afficher le mot de passe" id="toggle-password" type="checkbox" aria-describedby="password-input-messages">
+                        <label class="fr-password__checkbox fr-label" for="toggle-password">
+                            Afficher
                         </label>
                     </div>
-                    <a href="{{ path('app_forgot_password_request') }}" class="text-decoration-none">
-                        Mot de passe oublié ?
-                    </a>
+                    <div class="fr-messages-group" id="password-input-messages" aria-live="assertive"></div>
                 </div>
-                
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                
-                <button class="btn btn-primary w-100 mt-4" type="submit">
-                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                </button>
-            </form>
-        </div>
-        <div class="card-footer text-center py-3">
-            <p class="mb-0">Vous n'avez pas de compte ? 
-                <a href="{{ path('app_register') }}" class="text-decoration-none fw-bold">
-                    Créer un compte
-                </a>
-            </p>
-        </div>
+            </div>
+
+            <div class="fr-checkbox-group fr-mb-2w">
+                <input type="checkbox" id="remember_me" name="_remember_me">
+                <label class="fr-label" for="remember_me">Se souvenir de moi</label>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <button class="fr-btn w-100" type="submit" style="justify-content:center;">
+                Se connecter
+            </button>
+        </form>
+    </div>
+
+    <div class="login-footer">
+        Vous n'avez pas de compte ?
+        <a href="{{ path('app_register') }}">Créer un compte</a>
     </div>
 </div>
 {% endblock %}

@@ -59,7 +59,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     if (in_array('ROLE_ADMIN', $user->getRoles())) {
         return new RedirectResponse($this->urlGenerator->generate('admin_utilisateur_index'));
     } elseif (in_array('ROLE_FORMATEUR', $user->getRoles())) {
-        return new RedirectResponse($this->urlGenerator->generate('formateur_lister'));
+        return new RedirectResponse($this->urlGenerator->generate('formateur_mes_formations'));
     }
 
     // Redirection par défaut pour les utilisateurs normaux

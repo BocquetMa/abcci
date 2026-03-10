@@ -151,9 +151,9 @@ class Formation
         return $this->prix;
     }
 
-    public function setPrix(float $prix): static
+    public function setPrix(float|string $prix): static
     {
-        $this->prix = $prix;
+        $this->prix = (float) $prix;
         return $this;
     }
 

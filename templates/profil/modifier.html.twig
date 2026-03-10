@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier mon profil - ABCCI{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:1100px; padding:2rem 1.5rem;">
+    <div class="row g-4">
+        <div class="col-md-3">
+            {% include 'profil/_sidebar.html.twig' with {active: 'modifier'} %}
+        </div>
+        <div class="col-md-9">
+            {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
+
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm); margin-bottom:1rem;">
+                <h2 style="font-size:1rem; font-weight:700; color:var(--clr-text); margin:0 0 1.5rem;">
+                    <i class="fas fa-edit me-2" style="color:var(--clr-primary);"></i>Modifier mon profil
+                </h2>
+
+                <!-- Photo de profil -->
+                <div class="mb-4">
+                    <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Photo de profil</h3>
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--clr-primary),var(--clr-primary-dark)); display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:700; color:white; flex-shrink:0; overflow:hidden;">
+                            {% if user.photo %}
+                                <img src="{{ asset('uploads/photos/' ~ user.photo) }}" style="width:100%;height:100%;object-fit:cover;" alt="Photo">
+                            {% else %}
+                                {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div style="flex:1;">
+                            {{ form_widget(form.photoFile, {attr: {class: 'form-control form-control-sm'}}) }}
+                            {{ form_errors(form.photoFile) }}
+                            <div style="font-size:0.75rem; color:var(--clr-text-muted); margin-top:0.3rem;">JPG ou PNG, max 1 Mo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biographie -->
+                <div class="mb-4">
+                    <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Biographie</h3>
+                    {{ form_label(form.biographieDetaillee, null, {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.biographieDetaillee, {attr: {class: 'form-control', rows: 4, placeholder: 'Décrivez-vous en quelques mots...'}}) }}
+                    {{ form_errors(form.biographieDetaillee) }}
+                </div>
+
+                <!-- CV -->
+                <div class="mb-4">
+                    <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">CV</h3>
+                    {% if user.cvFilename %}
+                        <div style="margin-bottom:0.75rem; font-size:0.875rem; color:var(--clr-text-muted);">
+                            <i class="fas fa-file-pdf me-1" style="color:var(--clr-danger);"></i>
+                            CV actuel :
+                            <a href="{{ asset('uploads/cv/' ~ user.cvFilename) }}" target="_blank" style="color:var(--clr-primary);">Voir le CV</a>
+                        </div>
+                    {% endif %}
+                    {{ form_widget(form.cvFile, {attr: {class: 'form-control form-control-sm'}}) }}
+                    {{ form_errors(form.cvFile) }}
+                    <div style="font-size:0.75rem; color:var(--clr-text-muted); margin-top:0.3rem;">PDF, max 2 Mo</div>
+                </div>
+
+                <!-- Liens sociaux -->
+                {% if form.socialLinks is defined %}
+                <div class="mb-2">
+                    <h3 style="font-size:0.82rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">Liens sociaux</h3>
+                    <div id="social-links-container">
+                        {% for socialLink in form.socialLinks %}
+                        <div class="social-link-row d-flex gap-2 mb-2">
+                            {{ form_widget(socialLink.platform, {attr: {class: 'form-select form-select-sm', style: 'width:160px; flex-shrink:0;'}}) }}
+                            {{ form_widget(socialLink.url, {attr: {class: 'form-control form-control-sm', placeholder: 'https://...'}}) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+                <a href="{{ path('profil_index') }}" class="btn btn-outline-secondary btn-sm">Annuler</a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-save me-1"></i>Enregistrer
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

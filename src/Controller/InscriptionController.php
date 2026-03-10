@@ -66,7 +66,7 @@ class InscriptionController extends AbstractController
     public function annuler(Inscription $inscription, EntityManagerInterface $entityManager): Response
     {
         // Vérifier que l'utilisateur est bien le propriétaire de l'inscription
-        if ($inscription->getUtilisateur() !== $this->getUser()) {
+        if ($inscription->getUtilisateur()->getId() !== $this->getUser()->getId()) {
             throw $this->createAccessDeniedException();
         }
         
@@ -136,7 +136,7 @@ public function valider(
 ): Response {
     // Vérifier que le formateur est bien responsable de cette formation
     $formation = $inscription->getFormation();
-    if (!$this->isGranted('ROLE_ADMIN') && $formation->getFormateur() !== $this->getUser()) {
+    if (!$this->isGranted('ROLE_ADMIN') && $formation->getFormateur()->getId() !== $this->getUser()->getId()) {
         throw $this->createAccessDeniedException();
     }
     
@@ -208,9 +208,9 @@ public function valider(
     {
         // Vérifier que l'utilisateur a le droit de voir cette inscription
         if (
-            $inscription->getUtilisateur() !== $this->getUser() && 
-            !$this->isGranted('ROLE_ADMIN') && 
-            ($inscription->getFormation()->getFormateur() !== $this->getUser())
+            $inscription->getUtilisateur()->getId() !== $this->getUser()->getId() &&
+            !$this->isGranted('ROLE_ADMIN') &&
+            $inscription->getFormation()->getFormateur()->getId() !== $this->getUser()->getId()
         ) {
             throw $this->createAccessDeniedException();
         }
@@ -228,7 +228,7 @@ public function valider(
     ): Response {
         // Vérifier que le formateur est bien responsable de cette formation
         $formation = $inscription->getFormation();
-        if (!$this->isGranted('ROLE_ADMIN') && $formation->getFormateur() !== $this->getUser()) {
+        if (!$this->isGranted('ROLE_ADMIN') && $formation->getFormateur()->getId() !== $this->getUser()->getId()) {
             throw $this->createAccessDeniedException();
         }
         

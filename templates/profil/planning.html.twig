@@ -1,68 +1,102 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Mon Planning de Formations{% endblock %}
+{% block title %}Mon planning - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    <h1>Mon Planning de Formations</h1>
-
-    {% if planning|length > 0 %}
-        {% for date, formations in planning %}
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{{ date|date('d/m/Y') }}</h5>
+<div class="container" style="max-width:1100px; padding:2rem 1.5rem;">
+    <div class="row g-4">
+        <div class="col-md-3">
+            {% include 'profil/_sidebar.html.twig' with {active: 'planning'} %}
+        </div>
+        <div class="col-md-9">
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm);">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:1rem; font-weight:700; color:var(--clr-text); margin:0;">
+                        <i class="fas fa-calendar-alt me-2" style="color:var(--clr-primary);"></i>
+                        Mon planning {% if is_formateur %}— formations animées{% endif %}
+                    </h2>
+                    {% if planning|length > 0 %}
+                        <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.78rem; font-weight:600; padding:0.25rem 0.75rem; border-radius:100px;">
+                            {{ planning|length }} date{{ planning|length != 1 ? 's' : '' }}
+                        </span>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    {% for formation in formations %}
-                        <div class="mb-3 p-3 border-bottom {% if not loop.last %}border-bottom{% endif %}">
-                            <h6 class="text-primary">{{ formation.titre }}</h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p class="mb-1">
-                                        <i class="fas fa-clock"></i>
-                                        <strong>Durée :</strong> {{ formation.duree }}h
-                                    </p>
-                                    <p class="mb-1">
-                                        <i class="fas fa-tag"></i>
-                                        <strong>Thème :</strong> {{ formation.theme }}
-                                    </p>
-                                    <p class="mb-1">
-                                        <i class="fas fa-layer-group"></i>
-                                        <strong>Niveau :</strong> {{ formation.niveau }}
-                                    </p>
+
+                {% if planning|length > 0 %}
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        {% for date, items in planning %}
+                            <div>
+                                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+                                    <div style="background:var(--clr-primary); color:white; font-size:0.75rem; font-weight:700; padding:0.2rem 0.75rem; border-radius:100px; white-space:nowrap;">
+                                        {% if date == '0000-00-00' %}
+                                            Date non définie
+                                        {% else %}
+                                            {{ date|date('d/m/Y') }}
+                                        {% endif %}
+                                    </div>
+                                    <div style="flex:1; height:1px; background:var(--clr-border);"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <p class="mb-1">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        <strong>Période :</strong><br>
-                                        Du {{ formation.dateDebut|date('d/m/Y') }}<br>
-                                        au {{ formation.dateFin|date('d/m/Y') }}
-                                    </p>
-                                    <p class="mb-0">
-                                        <i class="fas fa-user-tie"></i>
-                                        <strong>Formateur :</strong><br>
-                                        {{ formation.formateur.nom }} {{ formation.formateur.prenom }}
-                                    </p>
+
+                                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                    {% for item in items %}
+                                    <div style="background:var(--clr-bg); border:1px solid var(--clr-border); border-left:3px solid var(--clr-primary); border-radius:var(--radius); padding:1rem 1.25rem;">
+                                        {% if item.type == 'formation' %}
+                                            {% set f = item.formation %}
+                                            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                                                <div>
+                                                    <div style="font-size:0.9375rem; font-weight:600; color:var(--clr-text);">{{ f.titre }}</div>
+                                                    {% if f.theme or f.niveau %}
+                                                    <div style="margin-top:0.25rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                                        {% if f.theme %}<span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.7rem; font-weight:600; padding:0.1rem 0.5rem; border-radius:100px;">{{ f.theme }}</span>{% endif %}
+                                                        {% if f.niveau %}<span style="background:#EDE9FE; color:#5B21B6; font-size:0.7rem; font-weight:600; padding:0.1rem 0.5rem; border-radius:100px;">{{ f.niveau }}</span>{% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <a href="{{ path('formation_voir', {id: f.id}) }}"
+                                                   style="font-size:0.78rem; color:var(--clr-primary); font-weight:500; text-decoration:none; white-space:nowrap; flex-shrink:0;">
+                                                    Voir →
+                                                </a>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:var(--clr-text-muted); display:flex; gap:1rem; flex-wrap:wrap;">
+                                                {% if f.dateDebut %}<span><i class="fas fa-calendar me-1" style="color:var(--clr-primary);"></i>{{ f.dateDebut|date('d/m/Y') }} → {{ f.dateFin|date('d/m/Y') }}</span>{% endif %}
+                                                {% if f.duree %}<span><i class="fas fa-clock me-1" style="color:var(--clr-primary);"></i>{{ f.duree }}h</span>{% endif %}
+                                                <span><i class="fas fa-users me-1" style="color:var(--clr-primary);"></i>{{ f.placesOccupees }}/{{ f.nombrePlacesTotal }} participants</span>
+                                            </div>
+                                        {% else %}
+                                            {% set insc = item.inscription %}
+                                            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                                                <div style="font-size:0.9375rem; font-weight:600; color:var(--clr-text);">{{ insc.formation.titre }}</div>
+                                                <a href="{{ path('formation_voir', {id: insc.formation.id}) }}"
+                                                   style="font-size:0.78rem; color:var(--clr-primary); font-weight:500; text-decoration:none; white-space:nowrap; flex-shrink:0;">
+                                                    Voir →
+                                                </a>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:var(--clr-text-muted); display:flex; gap:1rem; flex-wrap:wrap;">
+                                                <span><i class="fas fa-calendar me-1" style="color:var(--clr-primary);"></i>{{ insc.dateDebut|date('d/m/Y') }} → {{ insc.dateFin|date('d/m/Y') }}</span>
+                                                {% if insc.formation.formateur %}<span><i class="fas fa-user-tie me-1" style="color:var(--clr-primary);"></i>{{ insc.formation.formateur.prenom }} {{ insc.formation.formateur.nom }}</span>{% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align:center; padding:3rem 1rem; color:var(--clr-text-muted);">
+                        <i class="fas fa-calendar-alt" style="font-size:2.5rem; opacity:0.2; display:block; margin-bottom:1rem;"></i>
+                        {% if is_formateur %}
+                            <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucune formation planifiée</p>
+                            <p style="font-size:0.85rem; margin-bottom:1.5rem;">Vous n'avez pas encore de formations à animer.</p>
+                            <a href="{{ path('formateur_mes_formations') }}" class="btn btn-primary btn-sm">Voir mes formations</a>
+                        {% else %}
+                            <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucune session planifiée</p>
+                            <p style="font-size:0.85rem; margin-bottom:1.5rem;">Vous n'êtes inscrit(e) à aucune formation validée pour le moment.</p>
+                            <a href="{{ path('formation_lister') }}" class="btn btn-primary btn-sm">Voir les formations</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
-            Vous n'êtes inscrit(e) à aucune formation validée pour le moment.
-            <br>
-            <a href="{{ path('formation_lister') }}" class="btn btn-primary mt-3">
-                Voir les formations disponibles
-            </a>
         </div>
-    {% endif %}
-
-    <a href="{{ path('profil_index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Retour au profil
-    </a>
+    </div>
 </div>
 {% endblock %}

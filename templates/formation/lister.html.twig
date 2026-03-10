@@ -1,539 +1,236 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Liste des formations{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        /* Styles généraux */
-        .page-header {
-            position: relative;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #f1f3f5;
-        }
-        
-        .page-header:after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: -1px;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-        }
-        
-        /* Styles des cartes de formation */
-        .formation-card {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border: none;
-            transition: all 0.3s ease;
-        }
-        
-        .formation-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        .formation-card .card-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            padding: 1.25rem;
-            border: none;
-        }
-        
-        .formation-card .card-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-            line-height: 1.4;
-        }
-        
-        .formation-card .card-body {
-            padding: 1.5rem;
-        }
-        
-        .formation-card .card-text {
-            color: #495057;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            height: 4.8rem;
-            overflow: hidden;
-        }
-        
-        .formation-info-list {
-            margin-bottom: 0;
-        }
-        
-        .formation-info-item {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #f1f3f5;
-            color: #495057;
-        }
-        
-        .formation-info-item:last-child {
-            border-bottom: none;
-        }
-        
-        .formation-info-icon {
-            width: 24px;
-            height: 24px;
-            background-color: var(--primary-light);
-            color: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 0.75rem;
-            font-size: 0.8rem;
-        }
-        
-        .formation-card .card-footer {
-            padding: 1.25rem 1.5rem;
-            background-color: #f8f9fa;
-        }
-        
-        /* Badges */
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        
-        .badge-disponible {
-            background-color: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            border: 1px solid rgba(40, 167, 69, 0.2);
-        }
-        
-        .badge-complet {
-            background-color: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-        
-        /* Boutons */
-        .btn-formation {
-            padding: 0.6rem 1.25rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11);
-        }
-        
-        .btn-formation.btn-primary {
-            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
-            border: none;
-        }
-        
-        .btn-formation.btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.15);
-        }
-        
-        .btn-formation.btn-outline-primary {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-        }
-        
-        .btn-formation.btn-outline-primary:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-2px);
-        }
-        
-        /* Formulaire de recherche */
-        .search-card {
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border: none;
-            margin-bottom: 2.5rem;
-            overflow: hidden;
-        }
-        
-        .search-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 0;
-            padding: 1rem 1.75rem;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .search-title i.fa-filter {
-            margin-right: 0.75rem;
-            color: var(--primary);
-        }
-        
-        .search-title .toggle-icon {
-            margin-left: auto;
-            transition: transform 0.3s ease;
-            font-size: 0.9rem;
-        }
-        
-        .search-title.collapsed .toggle-icon {
-            transform: rotate(-180deg);
-        }
-        
-        .search-card .card-body {
-            padding: 1.75rem;
-        }
-        
-        .form-control, .form-select {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-            transition: all 0.2s;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-        
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Styles pour les mots-clés */
-        .keywords-container {
-            margin-top: 1rem;
-        }
-        
-        .keywords-title {
-            font-weight: 500;
-            margin-bottom: 0.75rem;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-        }
-        
-        .keywords-title i {
-            color: var(--primary);
-            margin-right: 0.5rem;
-        }
-        
-        .keywords-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .keyword-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--dark);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .keyword-tag:hover {
-            background-color: var(--primary-light);
-            border-color: var(--primary-light);
-            color: var(--primary);
-        }
-        
-        .keyword-tag.active {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .keyword-tag input[type="checkbox"] {
-            position: absolute;
-            opacity: 0;
-        }
-        
-        /* Message d'alerte */
-        .alert-custom {
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: none;
-            display: flex;
-            align-items: center;
-        }
-        
-        .alert-custom i {
-            font-size: 1.5rem;
-            margin-right: 1rem;
-        }
-        
-        .alert-info.alert-custom {
-            background-color: #e1f5fe;
-            color: #0277bd;
-        }
-        
-        /* Animation pour les alertes flash */
-        @keyframes slideInDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .alert-flash {
-            animation: slideInDown 0.4s ease-out forwards;
-            border-radius: 10px;
-            border: none;
-            padding: 1rem 1.5rem;
-        }
-
-        /* Prix inputs */
-        .prix-range {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .prix-range .form-control {
-            max-width: 200px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .formation-card .card-text {
-                height: auto;
-                max-height: 4.8rem;
-            }
-            
-            .keywords-grid {
-                gap: 0.5rem;
-            }
-            
-            .keyword-tag {
-                padding: 0.4rem 0.75rem;
-                font-size: 0.8rem;
-            }
-        }
-    </style>
-{% endblock %}
+{% block title %}Formations - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-5">
-    {# Messages flash #}
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-flash alert-dismissible fade show">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'danger' ? 'exclamation-circle' : 'info-circle') }} me-3"></i>
-                    <div>{{ message }}</div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
+<div class="container" style="max-width:1200px; padding:2rem 1.5rem;">
 
-    <div class="d-flex justify-content-between align-items-center page-header">
-        <h1>Liste des formations</h1>
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h1 style="font-size:1.25rem; font-weight:700; color:var(--clr-text); margin:0 0 0.2rem;">Formations disponibles</h1>
+            <p style="font-size:0.85rem; color:var(--clr-text-muted); margin:0;">{{ formations|length }} formation{{ formations|length != 1 ? 's' : '' }} trouvée{{ formations|length != 1 ? 's' : '' }}</p>
+        </div>
         {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('formation_ajouter') }}" class="btn btn-formation btn-primary">
-                <i class="fas fa-plus me-2"></i> Nouvelle formation
+            <a href="{{ path('formation_ajouter') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>Nouvelle formation
             </a>
         {% endif %}
     </div>
 
-    {# Formulaire de recherche collapsible #}
-    <div class="card search-card">
-        <h5 class="search-title" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-expanded="true" aria-controls="searchCollapse">
-            <i class="fas fa-filter"></i> Filtrer les formations
-            <i class="fas fa-chevron-up toggle-icon"></i>
-        </h5>
-        
-        <div class="collapse show" id="searchCollapse">
-            <div class="card-body">
-                {{ form_start(searchForm, {'attr': {'class': 'row g-3'}}) }}
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.theme) }}
-                        {{ form_widget(searchForm.theme, {'attr': {'class': 'form-select'}}) }}
+    <!-- Filtres -->
+    <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); margin-bottom:1.5rem; box-shadow:var(--shadow-sm); overflow:hidden;">
+        <button type="button" id="filter-toggle"
+                style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:0.875rem 1.25rem; background:none; border:none; font-size:0.875rem; font-weight:600; color:var(--clr-text); cursor:pointer;">
+            <span><i class="fas fa-sliders-h me-2" style="color:var(--clr-primary);"></i>Filtrer les formations</span>
+            <i class="fas fa-chevron-down" id="filter-chevron" style="font-size:0.75rem; color:var(--clr-text-muted); transition:transform 0.2s;"></i>
+        </button>
+        <div id="filter-body" style="border-top:1px solid var(--clr-border); padding:1.25rem;">
+            {{ form_start(searchForm, {attr: {class: 'row g-3'}}) }}
+                <div class="col-md-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Thème</label>
+                    {{ form_widget(searchForm.theme, {attr: {class: 'form-select form-select-sm'}}) }}
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Niveau</label>
+                    {{ form_widget(searchForm.niveau, {attr: {class: 'form-select form-select-sm'}}) }}
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Durée min (h)</label>
+                    {{ form_widget(searchForm.dureeMin, {attr: {class: 'form-control form-control-sm', placeholder: 'Ex: 7'}}) }}
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Durée max (h)</label>
+                    {{ form_widget(searchForm.dureeMax, {attr: {class: 'form-control form-control-sm', placeholder: 'Ex: 35'}}) }}
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Prix min (€)</label>
+                    {{ form_widget(searchForm.prixMin, {attr: {class: 'form-control form-control-sm', placeholder: 'Ex: 100'}}) }}
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.35rem;">Prix max (€)</label>
+                    {{ form_widget(searchForm.prixMax, {attr: {class: 'form-control form-control-sm', placeholder: 'Ex: 1000'}}) }}
+                </div>
+
+                {% if searchForm.motsCles is defined %}
+                <div class="col-12">
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--clr-text-muted); display:block; margin-bottom:0.5rem;">Mots-clés</label>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+                        {% for motCleWidget in searchForm.motsCles %}
+                            <label class="kw-tag {% if motCleWidget.vars.checked %}active{% endif %}">
+                                {{ form_widget(motCleWidget) }}
+                                {{ motCleWidget.vars.label }}
+                            </label>
+                        {% endfor %}
                     </div>
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.niveau) }}
-                        {{ form_widget(searchForm.niveau, {'attr': {'class': 'form-select'}}) }}
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.dureeMin) }}
-                        {{ form_widget(searchForm.dureeMin, {'attr': {'class': 'form-control', 'placeholder': 'Min'}}) }}
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.dureeMax) }}
-                        {{ form_widget(searchForm.dureeMax, {'attr': {'class': 'form-control', 'placeholder': 'Max'}}) }}
-                    </div>
-                    
-                    {# Prix min et max #}
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.prixMin) }}
-                        {{ form_widget(searchForm.prixMin, {'attr': {'class': 'form-control', 'placeholder': 'Min'}}) }}
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        {{ form_label(searchForm.prixMax) }}
-                        {{ form_widget(searchForm.prixMax, {'attr': {'class': 'form-control', 'placeholder': 'Max'}}) }}
-                    </div>
-                    
-                    {# Section des mots-clés #}
-                    <div class="col-12">
-                        <h6 class="keywords-title">
-                            <i class="fas fa-tags"></i> {{ form_label(searchForm.motsCles) }}
-                        </h6>
-                        <div class="keywords-grid">
-                            {% for motCleWidget in searchForm.motsCles %}
-                                <label class="keyword-tag {% if motCleWidget.vars.checked %}active{% endif %}">
-                                    {{ form_widget(motCleWidget) }}
-                                    {{ motCleWidget.vars.label }}
-                                </label>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 d-flex gap-2">
-                        <button type="submit" class="btn btn-formation btn-primary px-4">
-                            <i class="fas fa-search me-2"></i> Rechercher
-                        </button>
-                        <button type="reset" class="btn btn-formation btn-outline-secondary px-4" id="resetFilters">
-                            <i class="fas fa-undo me-2"></i> Réinitialiser
-                        </button>
-                    </div>
-                {{ form_end(searchForm) }}
-            </div>
+                </div>
+                {% endif %}
+
+                <div class="col-12 d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search me-1"></i>Rechercher
+                    </button>
+                    <button type="button" id="resetFilters" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-redo me-1"></i>Réinitialiser
+                    </button>
+                </div>
+            {{ form_end(searchForm) }}
         </div>
     </div>
 
+    <!-- Grille formations -->
     {% if formations|length > 0 %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for formation in formations %}
-                <div class="col">
-                    <div class="card h-100 formation-card">
-                        <div class="card-header text-white">
-                            <h5 class="card-title mb-0">{{ formation.titre }}</h5>
+            <div class="col">
+                <div class="formation-card" style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); box-shadow:var(--shadow-sm); display:flex; flex-direction:column; height:100%; transition:box-shadow 0.15s, transform 0.15s;">
+                    <!-- Top color band -->
+                    <div style="height:4px; background:linear-gradient(90deg, var(--clr-primary), var(--clr-primary-dark)); border-radius:var(--radius) var(--radius) 0 0;"></div>
+
+                    <div style="padding:1.25rem; flex:1; display:flex; flex-direction:column;">
+                        <!-- Badges -->
+                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+                            {% if formation.theme %}
+                                <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px; letter-spacing:0.03em;">{{ formation.theme }}</span>
+                            {% endif %}
+                            {% if formation.niveau %}
+                                <span style="background:#EDE9FE; color:#5B21B6; font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px; letter-spacing:0.03em;">{{ formation.niveau }}</span>
+                            {% endif %}
+                            {% if formation.placesDisponibles > 0 %}
+                                <span style="background:#D1FAE5; color:#065F46; font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">Disponible</span>
+                            {% else %}
+                                <span style="background:#FEE2E2; color:#991B1B; font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:100px;">Complet</span>
+                            {% endif %}
                         </div>
-                        <div class="card-body">
-                            <p class="card-text">{{ formation.description|u.truncate(150, '...') }}</p>
-                            <ul class="list-unstyled formation-info-list">
-                                <li class="formation-info-item">
-                                    <span class="formation-info-icon"><i class="fas fa-clock"></i></span>
-                                    <span>Durée: <strong>{{ formation.duree }}h</strong></span>
-                                </li>
-                                <li class="formation-info-item">
-                                    <span class="formation-info-icon"><i class="fas fa-tag"></i></span>
-                                    <span>Tarif: <strong>{{ formation.prix }}€</strong></span>
-                                </li>
-                                <li class="formation-info-item">
-                                    <span class="formation-info-icon"><i class="fas fa-users"></i></span>
-                                    <span>Places: <strong>{{ formation.placesDisponibles }}</strong> disponibles</span>
-                                </li>
-                                <li class="formation-info-item">
-                                    <span class="formation-info-icon"><i class="fas fa-calendar-alt"></i></span>
-                                    <span>Début: <strong>{{ formation.dateDebut|date('d/m/Y') }}</strong></span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="card-footer">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="status-badge {{ formation.placesDisponibles > 0 ? 'badge-disponible' : 'badge-complet' }}">
-                                    {{ formation.placesDisponibles > 0 ? 'Disponible' : 'Complet' }}
-                                </span>
-                                <a href="{{ path('formation_voir', {'id': formation.id}) }}" class="btn btn-formation btn-outline-primary">
-                                    <i class="fas fa-eye me-1"></i> Détails
-                                </a>
+
+                        <!-- Titre -->
+                        <h3 style="font-size:0.9375rem; font-weight:700; color:var(--clr-text); margin:0 0 0.5rem; line-height:1.35;">
+                            <a href="{{ path('formation_voir', {id: formation.id}) }}" style="color:inherit; text-decoration:none;">
+                                {{ formation.titre }}
+                            </a>
+                        </h3>
+
+                        <!-- Description -->
+                        {% if formation.description %}
+                        <p style="font-size:0.8rem; color:var(--clr-text-muted); line-height:1.5; margin:0 0 1rem; flex:1;">
+                            {{ formation.description|u.truncate(100, '…') }}
+                        </p>
+                        {% endif %}
+
+                        <!-- Meta -->
+                        <div style="display:flex; flex-direction:column; gap:0.4rem; padding:0.875rem; background:var(--clr-bg); border-radius:var(--radius-sm); margin-bottom:1rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                <span style="color:var(--clr-text-muted);"><i class="fas fa-clock me-1"></i>Durée</span>
+                                <strong style="color:var(--clr-text);">{{ formation.duree }}h</strong>
                             </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                <span style="color:var(--clr-text-muted);"><i class="fas fa-euro-sign me-1"></i>Tarif</span>
+                                <strong style="color:var(--clr-primary);">{{ formation.prix }}€</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                <span style="color:var(--clr-text-muted);"><i class="fas fa-users me-1"></i>Places</span>
+                                <strong style="color:var(--clr-text);">{{ formation.placesDisponibles }} dispo.</strong>
+                            </div>
+                            {% if formation.dateDebut %}
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                <span style="color:var(--clr-text-muted);"><i class="fas fa-calendar me-1"></i>Début</span>
+                                <strong style="color:var(--clr-text);">{{ formation.dateDebut|date('d/m/Y') }}</strong>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- CTA -->
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('formation_voir', {id: formation.id}) }}"
+                               class="btn btn-primary btn-sm" style="flex:1; text-align:center;">
+                                Voir la formation
+                            </a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('formation_modifier', {id: formation.id}) }}"
+                               style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:var(--radius-sm); border:1px solid var(--clr-border); background:var(--clr-surface); color:var(--clr-text-muted); font-size:0.8rem; text-decoration:none;">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert-custom alert-info">
-            <i class="fas fa-info-circle"></i>
-            <div>Aucune formation ne correspond à vos critères. Veuillez modifier vos filtres de recherche.</div>
+        <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:4rem 2rem; text-align:center; box-shadow:var(--shadow-sm);">
+            <i class="fas fa-search" style="font-size:2.5rem; opacity:0.15; display:block; margin-bottom:1rem;"></i>
+            <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucune formation trouvée</p>
+            <p style="font-size:0.85rem; color:var(--clr-text-muted); margin-bottom:1.5rem;">Modifiez vos critères de recherche pour trouver des formations.</p>
+            <button type="button" onclick="document.getElementById('resetFilters').click()" class="btn btn-outline-primary btn-sm">
+                Réinitialiser les filtres
+            </button>
         </div>
     {% endif %}
 </div>
+
+<style>
+.formation-card:hover {
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px);
+}
+.kw-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--clr-border);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--clr-text-muted);
+    background: var(--clr-surface);
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+    font-weight: 500;
+}
+.kw-tag:hover { border-color: var(--clr-primary); color: var(--clr-primary); background: var(--clr-primary-muted); }
+.kw-tag.active { background: var(--clr-primary); border-color: var(--clr-primary); color: white; }
+.kw-tag input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+</style>
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gestion des mots-clés
-        const keywordTags = document.querySelectorAll('.keyword-tag');
-        
-        keywordTags.forEach(tag => {
-            const checkbox = tag.querySelector('input[type="checkbox"]');
-            
-            // Initialisation des classes actives au chargement
-            if (checkbox.checked) {
-                tag.classList.add('active');
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtre toggle
+    var toggle = document.getElementById('filter-toggle');
+    var body = document.getElementById('filter-body');
+    var chevron = document.getElementById('filter-chevron');
+    if (toggle && body) {
+        toggle.addEventListener('click', function() {
+            var open = body.style.display !== 'none';
+            body.style.display = open ? 'none' : 'block';
+            chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+        });
+    }
+
+    // Mots-clés
+    document.querySelectorAll('.kw-tag').forEach(function(tag) {
+        var cb = tag.querySelector('input[type="checkbox"]');
+        tag.addEventListener('click', function(e) {
+            if (e.target !== cb) {
+                cb.checked = !cb.checked;
+                tag.classList.toggle('active', cb.checked);
             }
-            
-            // Gestion du clic sur les tags
-            tag.addEventListener('click', function(e) {
-                // Ne pas déclencher si on a cliqué directement sur la checkbox
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                    tag.classList.toggle('active', checkbox.checked);
-                }
-            });
-        });
-        
-        // Gestion du bouton de réinitialisation
-        const resetButton = document.getElementById('resetFilters');
-        if (resetButton) {
-            resetButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Désélectionner tous les mots-clés
-                keywordTags.forEach(tag => {
-                    const checkbox = tag.querySelector('input[type="checkbox"]');
-                    checkbox.checked = false;
-                    tag.classList.remove('active');
-                });
-                
-                // Réinitialiser les autres champs du formulaire
-                document.querySelectorAll('select.form-select').forEach(select => {
-                    select.selectedIndex = 0;
-                });
-                
-                document.querySelectorAll('input.form-control').forEach(input => {
-                    input.value = '';
-                });
-                
-                // Soumettre le formulaire pour actualiser les résultats
-                document.querySelector('form').submit();
-            });
-        }
-        
-        // Animation du collapse
-        const searchTitle = document.querySelector('.search-title');
-        const searchCollapse = document.getElementById('searchCollapse');
-        
-        searchCollapse.addEventListener('shown.bs.collapse', function () {
-            searchTitle.querySelector('.toggle-icon').style.transform = 'rotate(0)';
-        });
-        
-        searchCollapse.addEventListener('hidden.bs.collapse', function () {
-            searchTitle.querySelector('.toggle-icon').style.transform = 'rotate(180deg)';
         });
     });
+
+    // Reset
+    document.getElementById('resetFilters').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
+        document.querySelectorAll('input[type="number"], input[type="text"]').forEach(function(i) { i.value = ''; });
+        document.querySelectorAll('.kw-tag input[type="checkbox"]').forEach(function(cb) {
+            cb.checked = false;
+            cb.closest('.kw-tag').classList.remove('active');
+        });
+        document.querySelector('form').submit();
+    });
+});
 </script>
 {% endblock %}

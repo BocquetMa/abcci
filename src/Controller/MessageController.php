@@ -41,7 +41,7 @@ class MessageController extends AbstractController
         
         try {
             // Utiliser findConversations au lieu de findConversationsAlternative
-            $conversations = $messageRepository->findConversations($utilisateur);
+            $conversations = $messageRepository->findConversationsAlternative($utilisateur);
             
             // Compter les messages non lus
             $unreadCount = $messageRepository->countUnreadMessages($utilisateur);

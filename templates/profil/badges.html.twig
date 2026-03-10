@@ -1,105 +1,65 @@
-{# templates/profil/badges.html.twig #}
 {% extends 'base.html.twig' %}
-
-{% block title %}Mes badges - {{ parent() }}{% endblock %}
+{% block title %}Mes badges - ABCCI{% endblock %}
 
 {% block body %}
-<div class="container my-4">
-    <div class="row">
+<div class="container" style="max-width:1100px; padding:2rem 1.5rem;">
+    <div class="row g-4">
         <div class="col-md-3">
             {% include 'profil/_sidebar.html.twig' with {active: 'badges'} %}
         </div>
         <div class="col-md-9">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Mes badges</h2>
-                    <div>
-                        <span class="badge bg-primary">{{ total_badges }} badges</span>
-                        <span class="badge bg-success">{{ total_points }} points</span>
+            <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow-sm);">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:1rem; font-weight:700; color:var(--clr-text); margin:0;">
+                        <i class="fas fa-award me-2" style="color:var(--clr-primary);"></i>Mes badges
+                    </h2>
+                    <div class="d-flex gap-2">
+                        <span style="background:var(--clr-primary-muted); color:var(--clr-primary-dark); font-size:0.78rem; font-weight:600; padding:0.25rem 0.75rem; border-radius:100px;">{{ total_badges }} badge{{ total_badges != 1 ? 's' : '' }}</span>
+                        <span style="background:#FEF3C7; color:#92400E; font-size:0.78rem; font-weight:600; padding:0.25rem 0.75rem; border-radius:100px;">{{ total_points }} pts</span>
                     </div>
                 </div>
-                <div class="card-body">
-                    {% if total_badges > 0 %}
-                        <div class="mb-4">
-                            <h3>Badges de quiz</h3>
-                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_QUIZ')] is not empty %}
-                                <div class="row row-cols-2 row-cols-md-4 g-4">
-                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_QUIZ')] %}
-                                        <div class="col">
-                                            <div class="card h-100">
-                                                <div class="card-body text-center">
-                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
-                                                    <h5 class="card-title">{{ badge.nom }}</h5>
-                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
-                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
-                                                </div>
-                                                <div class="card-footer text-muted small">
-                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
-                                                </div>
-                                            </div>
+
+                {% if total_badges > 0 %}
+                    {% set categories = [
+                        {key: constant('App\\Entity\\Badge::TYPE_QUIZ'), label: 'Quiz', icon: 'fa-question-circle'},
+                        {key: constant('App\\Entity\\Badge::TYPE_FORMATION'), label: 'Formation', icon: 'fa-book-open'},
+                        {key: constant('App\\Entity\\Badge::TYPE_ACHIEVEMENT'), label: 'Réalisations', icon: 'fa-trophy'}
+                    ] %}
+
+                    {% for cat in categories %}
+                        {% if badges_groupes[cat.key] is not empty %}
+                            <div class="mb-4">
+                                <h3 style="font-size:0.85rem; font-weight:700; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;">
+                                    <i class="fas {{ cat.icon }} me-1"></i>{{ cat.label }}
+                                </h3>
+                                <div class="row g-3">
+                                    {% for badge in badges_groupes[cat.key] %}
+                                    <div class="col-6 col-sm-4 col-lg-3">
+                                        <div style="background:var(--clr-bg); border:1px solid var(--clr-border); border-radius:var(--radius); padding:1.25rem 1rem; text-align:center; transition:box-shadow 0.15s;">
+                                            <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}"
+                                                 style="max-height:56px; object-fit:contain; display:block; margin:0 auto 0.75rem;">
+                                            <div style="font-size:0.82rem; font-weight:600; color:var(--clr-text); margin-bottom:0.25rem;">{{ badge.nom }}</div>
+                                            <div style="font-size:0.72rem; color:var(--clr-primary); font-weight:600; margin-bottom:0.5rem;">+{{ badge.points }} pts</div>
+                                            <div style="font-size:0.7rem; color:var(--clr-text-light);">{{ badge.obtenuLe|date('d/m/Y') }}</div>
+                                            <a href="{{ path('profil_badge_details', {id: badge.id}) }}"
+                                               style="display:inline-block; margin-top:0.6rem; font-size:0.75rem; color:var(--clr-primary); font-weight:500; text-decoration:none;">
+                                                Détails →
+                                            </a>
                                         </div>
+                                    </div>
                                     {% endfor %}
                                 </div>
-                            {% else %}
-                                <p class="text-muted">Vous n'avez pas encore obtenu de badge de quiz.</p>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h3>Badges de formation</h3>
-                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_FORMATION')] is not empty %}
-                                <div class="row row-cols-2 row-cols-md-4 g-4">
-                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_FORMATION')] %}
-                                        <div class="col">
-                                            <div class="card h-100">
-                                                <div class="card-body text-center">
-                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
-                                                    <h5 class="card-title">{{ badge.nom }}</h5>
-                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
-                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
-                                                </div>
-                                                <div class="card-footer text-muted small">
-                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">Vous n'avez pas encore obtenu de badge de formation.</p>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-4">
-                            <h3>Autres réalisations</h3>
-                            {% if badges_groupes[constant('App\\Entity\\Badge::TYPE_ACHIEVEMENT')] is not empty %}
-                                <div class="row row-cols-2 row-cols-md-4 g-4">
-                                    {% for badge in badges_groupes[constant('App\\Entity\\Badge::TYPE_ACHIEVEMENT')] %}
-                                        <div class="col">
-                                            <div class="card h-100">
-                                                <div class="card-body text-center">
-                                                    <img src="{{ asset(badge.image) }}" alt="{{ badge.nom }}" class="img-fluid mb-2" style="max-height: 80px;">
-                                                    <h5 class="card-title">{{ badge.nom }}</h5>
-                                                    <p class="card-text text-muted">{{ badge.points }} points</p>
-                                                    <a href="{{ path('profil_badge_details', {id: badge.id}) }}" class="btn btn-sm btn-outline-primary">Détails</a>
-                                                </div>
-                                                <div class="card-footer text-muted small">
-                                                    Obtenu le {{ badge.obtenuLe|date('d/m/Y') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">Vous n'avez pas encore obtenu d'autres badges.</p>
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p>Vous n'avez pas encore obtenu de badge. Complétez des quiz et des formations pour en gagner !</p>
-                        </div>
-                    {% endif %}
-                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:3rem 1rem; color:var(--clr-text-muted);">
+                        <i class="fas fa-award" style="font-size:2.5rem; opacity:0.2; display:block; margin-bottom:1rem;"></i>
+                        <p style="font-size:0.9375rem; font-weight:600; color:var(--clr-text); margin-bottom:0.5rem;">Aucun badge pour le moment</p>
+                        <p style="font-size:0.85rem; margin-bottom:1.5rem;">Complétez des quiz et des formations pour gagner des badges !</p>
+                        <a href="{{ path('formation_lister') }}" class="btn btn-primary btn-sm">Voir les formations</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

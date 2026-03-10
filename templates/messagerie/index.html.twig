@@ -3,666 +3,429 @@
 {% block title %}Messagerie | ABCCI{% endblock %}
 
 {% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .messaging-container {
-            display: flex;
-            height: calc(100vh - var(--header-height) - 40px);
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            margin: 20px;
-        }
-        
-        .conversations-sidebar {
-            width: 300px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .conversations-header {
-            padding: 15px;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .conversations-header h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .new-message-btn {
-            background-color: white;
-            color: var(--primary);
-            border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-        
-        .new-message-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .search-box {
-            padding: 15px;
-            background-color: white;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 20px;
-            background-color: #f8f9fa;
-            transition: all 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: white;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        
-        .conversations-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        .conversation-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        
-        .conversation-item:hover {
-            background-color: #e9ecef;
-        }
-        
-        .conversation-item.active {
-            background-color: #e6f0ff;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .conversation-item.unread {
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-        
-        .conversation-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            margin-right: 15px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .conversation-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .conversation-avatar .online-indicator {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background-color: #40c057;
-            border-radius: 50%;
-            bottom: 3px;
-            right: 3px;
-            border: 2px solid white;
-        }
-        
-        .conversation-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .conversation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 5px;
-        }
-        
-        .conversation-name {
-            font-weight: 600;
-            color: var(--dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .conversation-time {
-            font-size: 0.8rem;
-            color: #6c757d;
-            white-space: nowrap;
-        }
-        
-        .conversation-preview {
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.9rem;
-            max-width: 180px;
-        }
-        
-        .unread-indicator {
-            width: 18px;
-            height: 18px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            margin-left: 10px;
-        }
-        
-        .empty-state-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .empty-state-icon {
-            font-size: 4rem;
-            color: #adb5bd;
-            margin-bottom: 20px;
-        }
-        
-        .empty-state-title {
-            font-size: 1.5rem;
-            color: #343a40;
-            margin-bottom: 10px;
-        }
-        
-        .empty-state-text {
-            color: #6c757d;
-            max-width: 500px;
-            margin-bottom: 20px;
-        }
-        
-        /* Styles améliorés pour la modal de recherche d'utilisateurs */
-        .new-message-modal .modal-content {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+{{ parent() }}
+<style>
+    /* ─── Layout messagerie ───────────────────────────── */
+    .msg-layout {
+        display: flex;
+        height: calc(100vh - 60px);
+        background: var(--clr-bg);
+        overflow: hidden;
+    }
 
-        .new-message-modal .modal-header {
-            background-color: var(--primary);
-            color: white;
-            border-bottom: none;
-            border-radius: 12px 12px 0 0;
-            padding: 16px 20px;
-        }
+    /* ─── Sidebar conversations ───────────────────────── */
+    .msg-sidebar {
+        width: 320px;
+        flex-shrink: 0;
+        background: var(--clr-surface);
+        border-right: 1px solid var(--clr-border);
+        display: flex;
+        flex-direction: column;
+    }
 
-        .new-message-modal .modal-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
+    .msg-sidebar-head {
+        padding: 1.1rem 1.25rem;
+        border-bottom: 1px solid var(--clr-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .msg-sidebar-head h2 {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--clr-text);
+        margin: 0;
+    }
+    .msg-compose-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        background: var(--clr-primary-muted);
+        border: none;
+        color: var(--clr-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.15s;
+    }
+    .msg-compose-btn:hover { background: var(--clr-primary-light); }
 
-        .new-message-modal .modal-body {
-            padding: 24px;
-        }
+    .msg-search {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--clr-border);
+        flex-shrink: 0;
+    }
+    .msg-search-input {
+        width: 100%;
+        padding: 0.5rem 0.875rem;
+        border: 1px solid var(--clr-border);
+        border-radius: 100px;
+        background: var(--clr-bg);
+        font-size: 0.82rem;
+        color: var(--clr-text);
+        font-family: 'Inter', sans-serif;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        outline: none;
+    }
+    .msg-search-input:focus {
+        border-color: var(--clr-primary);
+        box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+        background: white;
+    }
+    .msg-search-input::placeholder { color: var(--clr-text-light); }
 
-        /* Amélioration du champ de recherche */
-        .destinataire-search-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
+    .msg-conv-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .msg-conv-list::-webkit-scrollbar { width: 4px; }
+    .msg-conv-list::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 2px; }
 
-        .destinataire-search-container .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #adb5bd;
-            z-index: 2;
-        }
+    .msg-conv-item {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--clr-border);
+        text-decoration: none;
+        transition: background 0.12s;
+        cursor: pointer;
+    }
+    .msg-conv-item:hover { background: var(--clr-bg); }
+    .msg-conv-item.active { background: var(--clr-primary-muted); border-left: 2px solid var(--clr-primary); }
+    .msg-conv-item.unread .msg-conv-name { font-weight: 700; }
+    .msg-conv-item.unread .msg-conv-preview { color: var(--clr-text); }
 
-        #destinataireSearch {
-            padding: 12px 12px 12px 40px;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-            background-color: #f8f9fa;
-            font-size: 1rem;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
+    .msg-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .msg-avatar.sm { width: 36px; height: 36px; font-size: 0.72rem; }
 
-        #destinataireSearch:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-            background-color: white;
-        }
+    .msg-conv-body { flex: 1; min-width: 0; }
+    .msg-conv-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 0.2rem;
+    }
+    .msg-conv-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--clr-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .msg-conv-time {
+        font-size: 0.72rem;
+        color: var(--clr-text-light);
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-left: 0.5rem;
+    }
+    .msg-conv-preview {
+        font-size: 0.8rem;
+        color: var(--clr-text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .msg-unread-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--clr-primary);
+        flex-shrink: 0;
+    }
 
-        /* Amélioration des résultats de recherche */
-        .user-search-results {
-            max-height: 350px;
-            overflow-y: auto;
-            border-radius: 10px;
-            background-color: white;
-        }
+    /* ─── Zone principale ─────────────────────────────── */
+    .msg-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        background: var(--clr-bg);
+        color: var(--clr-text-muted);
+        text-align: center;
+        padding: 2rem;
+    }
+    .msg-empty-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--clr-primary-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--clr-primary);
+    }
+    .msg-empty-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--clr-text);
+        margin: 0;
+    }
+    .msg-empty-sub {
+        font-size: 0.85rem;
+        color: var(--clr-text-muted);
+        margin: 0;
+        max-width: 300px;
+    }
 
-        .user-search-results::-webkit-scrollbar {
-            width: 8px;
-        }
+    /* ─── Modal nouveau message ───────────────────────── */
+    .msg-modal-header {
+        background: linear-gradient(135deg, var(--clr-primary-dark), var(--clr-primary));
+        color: white;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: 1.1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .msg-modal-header .modal-title { font-size: 0.9375rem; font-weight: 600; color: white; }
+    .msg-modal-header .btn-close { filter: invert(1); opacity: 0.8; }
 
-        .user-search-results::-webkit-scrollbar-track {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-        }
+    .user-search-item {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 0.75rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+    .user-search-item:hover { background: var(--clr-primary-muted); }
+    .user-search-info { flex: 1; min-width: 0; }
+    .user-search-name { font-size: 0.875rem; font-weight: 600; color: var(--clr-text); }
+    .user-search-email { font-size: 0.78rem; color: var(--clr-text-muted); }
+    .user-search-action {
+        width: 30px; height: 30px;
+        border-radius: var(--radius-sm);
+        background: var(--clr-primary-muted);
+        color: var(--clr-primary);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+    .user-search-item:hover .user-search-action { opacity: 1; }
 
-        .user-search-results::-webkit-scrollbar-thumb {
-            background-color: #dee2e6;
-            border-radius: 10px;
-        }
+    .search-empty-state, .search-error-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--clr-text-muted);
+    }
+    .search-empty-state i { font-size: 1.75rem; display: block; margin-bottom: 0.5rem; opacity: 0.4; }
+    .search-error-state { color: var(--clr-danger); }
 
-        .user-search-results::-webkit-scrollbar-thumb:hover {
-            background-color: #ced4da;
-        }
+    .search-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.5rem;
+        color: var(--clr-text-muted);
+        font-size: 0.85rem;
+    }
+    .search-spinner {
+        width: 20px; height: 20px;
+        border: 2px solid var(--clr-primary-light);
+        border-top-color: var(--clr-primary);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .user-search-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .user-search-item:hover {
-            background-color: #f0f7ff;
-            transform: translateY(-2px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .user-search-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 16px;
-            border: 2px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            flex-shrink: 0;
-        }
-
-        .user-search-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-search-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-search-name {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 4px;
-        }
-
-        .user-search-email {
-            font-size: 0.85rem;
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-search-action {
-            color: var(--primary);
-            background-color: rgba(13, 110, 253, 0.1);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            opacity: 0;
-        }
-
-        .user-search-item:hover .user-search-action {
-            opacity: 1;
-        }
-
-        .user-search-action:hover {
-            background-color: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        /* États vides et erreurs */
-        .search-empty-state, .search-error-state {
-            text-align: center;
-            padding: 24px 16px;
-            color: #6c757d;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }
-
-        .search-empty-state i, .search-error-state i {
-            font-size: 2rem;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .search-empty-state p, .search-error-state p {
-            margin-bottom: 0;
-            font-size: 0.95rem;
-        }
-
-        .search-error-state {
-            color: var(--danger);
-            background-color: rgba(220, 53, 69, 0.05);
-        }
-
-        /* Animation de chargement */
-        .search-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .search-spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(13, 110, 253, 0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: search-spinner 0.8s linear infinite;
-            margin-right: 12px;
-        }
-
-        @keyframes search-spinner {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .messaging-container {
-                flex-direction: column;
-                height: auto;
-                margin: 10px;
-            }
-            
-            .conversations-sidebar {
-                width: 100%;
-                height: 300px;
-            }
-        }
-    </style>
+    /* ─── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+        .msg-layout { flex-direction: column; height: auto; }
+        .msg-sidebar { width: 100%; height: 50vh; }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-    <div class="messaging-container">
-        <div class="conversations-sidebar">
-            <div class="conversations-header">
-                <h3><i class="fas fa-comments me-2"></i> Conversations</h3>
-                <button class="new-message-btn" data-bs-toggle="modal" data-bs-target="#newMessageModal">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="Rechercher..." id="conversationSearch">
-            </div>
-            
-            <div class="conversations-list">
-                {% if conversations|length > 0 %}
-                    {% for message in conversations %}
-                        {% set otherUser = message.expediteur.id == app.user.id ? message.destinataire : message.expediteur %}
-                        <a href="{{ path('messagerie_conversation', {'id': otherUser.id}) }}" class="conversation-item {% if not message.lu and message.destinataire.id == app.user.id %}unread{% endif %}">
-                            <div class="conversation-avatar">
-                                {% if otherUser.photo %}
-                                    <img src="{{ asset('uploads/photos/' ~ otherUser.photo) }}" alt="{{ otherUser.prenom }}">
-                                {% else %}
-                                    <div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="conversation-info">
-                                <div class="conversation-header">
-                                    <div class="conversation-name">{{ otherUser.prenom }} {{ otherUser.nom }}</div>
-                                    <div class="conversation-time">{{ message.dateEnvoi|date('H:i') }}</div>
-                                </div>
-                                <div class="conversation-preview">
-                                    {% if message.expediteur.id == app.user.id %}
-                                        <span class="text-muted">Vous:</span>
-                                    {% else %}
-                                        <span class="text-muted">{{ otherUser.prenom }}:</span>
-                                    {% endif %}
-                                    {{ message.contenu|slice(0, 30) }}{% if message.contenu|length > 30 %}...{% endif %}
-                                </div>
-                            </div>
-                            
-                            {% if not message.lu and message.destinataire.id == app.user.id %}
-                                <div class="unread-indicator">1</div>
-                            {% endif %}
-                        </a>
-                    {% endfor %}
-                {% else %}
-                    <div class="py-4 text-center text-muted">
-                        <i class="fas fa-inbox fa-2x mb-3"></i>
-                        <p>Aucune conversation</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="empty-state-container">
-            <div class="empty-state-icon">
-                <i class="far fa-comments"></i>
-            </div>
-            <h3 class="empty-state-title">Messagerie ABCCI</h3>
-            <p class="empty-state-text">
-                Sélectionnez une conversation ou commencez une nouvelle discussion pour communiquer avec d'autres utilisateurs.
-            </p>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newMessageModal">
-                <i class="fas fa-edit me-2"></i> Nouveau message
+<div class="msg-layout">
+
+    <!-- Sidebar -->
+    <aside class="msg-sidebar">
+        <div class="msg-sidebar-head">
+            <h2><i class="fas fa-comment-dots me-2" style="color:var(--clr-primary);"></i>Messages</h2>
+            <button class="msg-compose-btn" data-bs-toggle="modal" data-bs-target="#newMessageModal" title="Nouveau message">
+                <i class="fas fa-plus"></i>
             </button>
         </div>
-    </div>
-    
-    <!-- Modal pour nouveau message avec style amélioré -->
-    <div class="modal fade new-message-modal" id="newMessageModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Nouveau message</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+
+        <div class="msg-search">
+            <input type="text" class="msg-search-input" placeholder="🔍  Rechercher une conversation..." id="conversationSearch">
+        </div>
+
+        <div class="msg-conv-list">
+            {% if conversations|length > 0 %}
+                {% for message in conversations %}
+                    {% set otherUser = message.expediteur.id == app.user.id ? message.destinataire : message.expediteur %}
+                    {% set isUnread = not message.lu and message.destinataire.id == app.user.id %}
+                    <a href="{{ path('messagerie_conversation', {'id': otherUser.id}) }}"
+                       class="msg-conv-item {{ isUnread ? 'unread' : '' }}">
+                        <div class="msg-avatar">
+                            {% if otherUser.photo %}
+                                <img src="{{ asset('uploads/photos/' ~ otherUser.photo) }}" alt="{{ otherUser.prenom }}">
+                            {% else %}
+                                {{ otherUser.prenom|first|upper }}{{ otherUser.nom|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div class="msg-conv-body">
+                            <div class="msg-conv-row">
+                                <span class="msg-conv-name">{{ otherUser.prenom }} {{ otherUser.nom }}</span>
+                                <span class="msg-conv-time">{{ message.dateEnvoi|date('H:i') }}</span>
+                            </div>
+                            <div class="msg-conv-preview">
+                                {% if message.expediteur.id == app.user.id %}Vous : {% endif %}
+                                {{ message.contenu|slice(0, 38) }}{% if message.contenu|length > 38 %}…{% endif %}
+                            </div>
+                        </div>
+                        {% if isUnread %}<div class="msg-unread-dot"></div>{% endif %}
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div style="padding:2rem; text-align:center; color:var(--clr-text-muted);">
+                    <i class="fas fa-inbox" style="font-size:2rem; opacity:0.3; display:block; margin-bottom:0.75rem;"></i>
+                    <p style="font-size:0.85rem; margin:0;">Aucune conversation</p>
                 </div>
-                <div class="modal-body">
-                    <div class="destinataire-search-container">
-                        <span class="search-icon">
-                            <i class="fas fa-search"></i>
-                        </span>
-                        <input type="text" id="destinataireSearch" class="form-control" placeholder="Rechercher un utilisateur...">
-                    </div>
-                    
-                    <div id="searchStatus" class="search-loading d-none">
-                        <div class="search-spinner"></div>
-                        <span>Recherche en cours...</span>
-                    </div>
-                    
-                    <div class="user-search-results mt-3">
-                        <!-- Les résultats de la recherche seront ajoutés ici dynamiquement -->
-                    </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Zone principale - état vide -->
+    <main class="msg-main">
+        <div class="msg-empty-icon">
+            <i class="far fa-comment-dots"></i>
+        </div>
+        <p class="msg-empty-title">Bienvenue dans votre messagerie</p>
+        <p class="msg-empty-sub">Sélectionnez une conversation ou démarrez une nouvelle discussion.</p>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newMessageModal">
+            <i class="fas fa-edit me-1"></i> Nouveau message
+        </button>
+    </main>
+</div>
+
+<!-- Modal nouveau message -->
+<div class="modal fade" id="newMessageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+        <div class="modal-content" style="border-radius:var(--radius-lg); overflow:hidden;">
+            <div class="msg-modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Nouveau message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body" style="padding:1.25rem;">
+                <div style="position:relative; margin-bottom:1rem;">
+                    <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--clr-text-light);font-size:0.8rem;"></i>
+                    <input type="text" id="destinataireSearch" class="form-control"
+                           style="padding-left:2.25rem; border-radius:100px; font-size:0.875rem;"
+                           placeholder="Rechercher un utilisateur...">
                 </div>
+                <div id="searchStatus" class="search-loading d-none">
+                    <div class="search-spinner"></div>
+                    <span>Recherche...</span>
+                </div>
+                <div class="user-search-results"></div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Recherche de conversations
-            const searchInput = document.getElementById('conversationSearch');
-            const conversationItems = document.querySelectorAll('.conversation-item');
-            
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                
-                conversationItems.forEach(item => {
-                    const name = item.querySelector('.conversation-name').textContent.toLowerCase();
-                    const preview = item.querySelector('.conversation-preview').textContent.toLowerCase();
-                    
-                    if (name.includes(searchTerm) || preview.includes(searchTerm)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-            
-            // Recherche de destinataires améliorée
-            const destinataireSearch = document.getElementById('destinataireSearch');
-            const searchResults = document.querySelector('.user-search-results');
-            const searchStatus = document.getElementById('searchStatus');
-
-            let searchTimeout;
-
-            destinataireSearch.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const searchTerm = this.value.trim();
-                
-                if (searchTerm.length < 2) {
-                    searchResults.innerHTML = '';
-                    return;
-                }
-                
-                // Afficher l'indicateur de chargement
-                searchStatus.classList.remove('d-none');
-                searchResults.innerHTML = '';
-                
-                searchTimeout = setTimeout(() => {
-                    fetch(`{{ path('messagerie_rechercher_utilisateurs') }}?q=${searchTerm}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            // Cacher l'indicateur de chargement
-                            searchStatus.classList.add('d-none');
-                            searchResults.innerHTML = '';
-                            
-                            if (data.length === 0) {
-                                searchResults.innerHTML = `
-                                    <div class="search-empty-state">
-                                        <i class="fas fa-search"></i>
-                                        <p>Aucun utilisateur trouvé pour "${searchTerm}"</p>
-                                    </div>
-                                `;
-                                return;
-                            }
-                            
-                            data.forEach(user => {
-                                const userElement = document.createElement('div');
-                                userElement.className = 'user-search-item';
-                                userElement.innerHTML = `
-                                    <div class="user-search-avatar">
-                                        ${user.photo 
-                                            ? `<img src="{{ asset('uploads/photos/') }}/${user.photo}" alt="${user.text}">`
-                                            : `<div class="d-flex align-items-center justify-content-center bg-secondary h-100 w-100">
-                                                <i class="fas fa-user text-white"></i>
-                                              </div>`
-                                        }
-                                    </div>
-                                    <div class="user-search-info">
-                                        <div class="user-search-name">${user.text}</div>
-                                        <div class="user-search-email">${user.email}</div>
-                                    </div>
-                                    <div class="user-search-action">
-                                        <i class="fas fa-comment-dots"></i>
-                                    </div>
-                                `;
-                                
-                                userElement.addEventListener('click', function() {
-                                    window.location.href = `{{ path('messagerie_conversation', {'id': 'USER_ID'}) }}`.replace('USER_ID', user.id);
-                                });
-                                
-                                searchResults.appendChild(userElement);
-                            });
-                            
-                            // Animation d'apparition des résultats
-                            const items = document.querySelectorAll('.user-search-item');
-                            items.forEach((item, index) => {
-                                item.style.opacity = '0';
-                                item.style.transform = 'translateY(10px)';
-                                setTimeout(() => {
-                                    item.style.transition = 'all 0.3s ease';
-                                    item.style.opacity = '1';
-                                    item.style.transform = 'translateY(0)';
-                                }, index * 50);
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Erreur lors de la recherche:', error);
-                            searchStatus.classList.add('d-none');
-                            searchResults.innerHTML = `
-                                <div class="search-error-state">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <p>Une erreur est survenue lors de la recherche. Veuillez réessayer.</p>
-                                </div>
-                            `;
-                        });
-                }, 300);
-            });
-
-            // Focus automatique sur le champ de recherche lors de l'ouverture de la modal
-            document.getElementById('newMessageModal').addEventListener('shown.bs.modal', function () {
-                destinataireSearch.focus();
-            });
-
-            // Effacer les résultats à la fermeture de la modal
-            document.getElementById('newMessageModal').addEventListener('hidden.bs.modal', function () {
-                destinataireSearch.value = '';
-                searchResults.innerHTML = '';
-                searchStatus.classList.add('d-none');
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche dans les conversations
+    const searchInput = document.getElementById('conversationSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            document.querySelectorAll('.msg-conv-item').forEach(item => {
+                const name = item.querySelector('.msg-conv-name')?.textContent.toLowerCase() || '';
+                const preview = item.querySelector('.msg-conv-preview')?.textContent.toLowerCase() || '';
+                item.style.display = (name.includes(term) || preview.includes(term)) ? 'flex' : 'none';
             });
         });
-    </script>
+    }
+
+    // Recherche de destinataires
+    const destinataireSearch = document.getElementById('destinataireSearch');
+    const searchResults = document.querySelector('.user-search-results');
+    const searchStatus = document.getElementById('searchStatus');
+    let searchTimeout;
+
+    if (destinataireSearch) {
+        destinataireSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const term = this.value.trim();
+            if (term.length < 2) { searchResults.innerHTML = ''; return; }
+            searchStatus.classList.remove('d-none');
+            searchResults.innerHTML = '';
+            searchTimeout = setTimeout(() => {
+                fetch(`{{ path('messagerie_rechercher_utilisateurs') }}?q=${encodeURIComponent(term)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        searchStatus.classList.add('d-none');
+                        if (!data.length) {
+                            searchResults.innerHTML = `<div class="search-empty-state"><i class="fas fa-search"></i><p>Aucun résultat pour "${term}"</p></div>`;
+                            return;
+                        }
+                        searchResults.innerHTML = '';
+                        data.forEach(user => {
+                            const el = document.createElement('div');
+                            el.className = 'user-search-item';
+                            const initials = user.text.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+                            el.innerHTML = `
+                                <div class="msg-avatar sm">${user.photo
+                                    ? `<img src="{{ asset('uploads/photos/') }}/${user.photo}" alt="${user.text}">`
+                                    : initials}</div>
+                                <div class="user-search-info">
+                                    <div class="user-search-name">${user.text}</div>
+                                    <div class="user-search-email">${user.email}</div>
+                                </div>
+                                <div class="user-search-action"><i class="fas fa-arrow-right"></i></div>`;
+                            el.addEventListener('click', () => {
+                                window.location.href = `{{ path('messagerie_conversation', {'id': 'USER_ID'}) }}`.replace('USER_ID', user.id);
+                            });
+                            searchResults.appendChild(el);
+                        });
+                    })
+                    .catch(() => {
+                        searchStatus.classList.add('d-none');
+                        searchResults.innerHTML = `<div class="search-error-state"><i class="fas fa-exclamation-circle"></i><p>Erreur lors de la recherche</p></div>`;
+                    });
+            }, 300);
+        });
+
+        document.getElementById('newMessageModal').addEventListener('shown.bs.modal', () => destinataireSearch.focus());
+        document.getElementById('newMessageModal').addEventListener('hidden.bs.modal', () => {
+            destinataireSearch.value = '';
+            searchResults.innerHTML = '';
+            searchStatus.classList.add('d-none');
+        });
+    }
+});
+</script>
 {% endblock %}

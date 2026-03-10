@@ -36,19 +36,18 @@
 {{ parent() }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Fonction pour basculer l'affichage des sections
         function toggleSections() {
-            const accepter = document.getElementById('validation_inscription_action_accepter').checked;
+            const radio = document.getElementById('action_accepter');
+            if (!radio) return;
+            const accepter = radio.checked;
             document.querySelector('.action-accepter').style.display = accepter ? 'block' : 'none';
             document.querySelector('.action-refuser').style.display = !accepter ? 'block' : 'none';
         }
-        
-        // Ajouter des écouteurs d'événements aux boutons radio
-        document.querySelectorAll('input[name="validation_inscription[action]"]').forEach(radio => {
+
+        document.querySelectorAll('#action_accepter, #action_refuser').forEach(radio => {
             radio.addEventListener('change', toggleSections);
         });
-        
-        // Appel initial pour configurer l'affichage
+
         toggleSections();
     });
 </script>
